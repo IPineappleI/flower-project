@@ -426,11 +426,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\pine7\\RiderProjects\\FlowerProjectAPI\\FlowerProjectAPI\\FlowerProjectAPI.csproj",
+      "projectUniqueName": "C:\\Users\\pine7\\RiderProjects\\flower-project\\FlowerProjectAPI\\FlowerProjectAPI\\FlowerProjectAPI.csproj",
       "projectName": "FlowerProjectAPI",
-      "projectPath": "C:\\Users\\pine7\\RiderProjects\\FlowerProjectAPI\\FlowerProjectAPI\\FlowerProjectAPI.csproj",
+      "projectPath": "C:\\Users\\pine7\\RiderProjects\\flower-project\\FlowerProjectAPI\\FlowerProjectAPI\\FlowerProjectAPI.csproj",
       "packagesPath": "C:\\Users\\pine7\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\pine7\\RiderProjects\\FlowerProjectAPI\\FlowerProjectAPI\\obj\\",
+      "outputPath": "C:\\Users\\pine7\\RiderProjects\\flower-project\\FlowerProjectAPI\\FlowerProjectAPI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

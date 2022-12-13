@@ -13,13 +13,13 @@ public class ManagersController : ControllerBase
     private static async Task Create(Manager manager)
     {
         const string commandText = "INSERT INTO managers (login, password, is_admin) " +
-                                   "VALUES (@login, @password, @is_admin)";
+                                   "VALUES (@login, @password, @isAdmin)";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
         cmd.Parameters.AddWithValue("login", manager.Login);
         cmd.Parameters.AddWithValue("password", manager.Password);
-        cmd.Parameters.AddWithValue("is_admin", manager.IsAdmin);
+        cmd.Parameters.AddWithValue("isAdmin", manager.IsAdmin);
 
         await cmd.ExecuteNonQueryAsync();
     }

@@ -81,11 +81,11 @@ public class ItemsController : ControllerBase
     {
         const string commandText = @"UPDATE items
                 SET name = @name, price = @price, count = @count
-                WHERE name = @OldName";
+                WHERE name = @oldName";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
-        cmd.Parameters.AddWithValue("OldName", name);
+        cmd.Parameters.AddWithValue("oldName", name);
         cmd.Parameters.AddWithValue("name", item.Name);
         cmd.Parameters.AddWithValue("price", item.Price);
         cmd.Parameters.AddWithValue("count", item.Count);

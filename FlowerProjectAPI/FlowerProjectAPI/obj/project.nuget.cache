@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "1dRtudpYiPVGvJ6zHE4bN/i5TQrc2rZhYw2suGyyrLSlWtO/I6ir6rSXA5OfurwzI9qt1MuGAyij/IE7lqRxzg==",
+  "dgSpecHash": "ucfdA5CDvOhRB1wy09If8un5J0Ti0ZmrUPEZT++gdo5r/T+jsHe3DnmvMRKLQDZ0HdCIdNCvGiydj0chMrMwrg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\pine7\\RiderProjects\\FlowerProjectAPI\\FlowerProjectAPI\\FlowerProjectAPI.csproj",
+  "projectFilePath": "C:\\Users\\pine7\\RiderProjects\\flower-project\\FlowerProjectAPI\\FlowerProjectAPI\\FlowerProjectAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\pine7\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
     "C:\\Users\\pine7\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",

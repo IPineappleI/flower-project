@@ -1,9 +1,11 @@
-﻿using System.Data;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Data;
 using FlowerProjectAPI.Models;
 using FlowerProjectAPI.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Npgsql;
+using Validator = FlowerProjectAPI.Utility.Validator;
 
 namespace FlowerProjectAPI.Controllers;
 
@@ -125,6 +127,78 @@ public class OrdersController : ControllerBase
         }
 
         return Ok("order updated successfully");
+    }
+    
+    [HttpPatch("shoppingCart")]
+    public IActionResult PatchShoppingCart(int number, Dictionary<string, int> newShoppingCart)
+    {
+        var result = Read(number).Result;
+        if (result == null)
+        {
+            return BadRequest("order not found");
+        }
+
+        var roleValidationResult = Validator.ValidateShoppingCart(newShoppingCart);
+        if (roleValidationResult != ValidationResult.Success)
+        {
+            return BadRequest(roleValidationResult!.ErrorMessage);
+        }
+
+        result.ShoppingCart = newShoppingCart;
+        try
+        {
+            Update(number, result).Wait();
+        }
+        catch (AggregateException e)
+        {
+            return BadRequest(e.Message);
+        }
+        
+        return Ok("order shopping cart updated successfully");
+    }
+    
+    [HttpPatch("price")]
+    public IActionResult PatchPrice(int number, decimal newPrice)
+    {
+        var result = Read(number).Result;
+        if (result == null)
+        {
+            return BadRequest("order not found");
+        }
+
+        result.Price = newPrice;
+        try
+        {
+            Update(number, result).Wait();
+        }
+        catch (AggregateException e)
+        {
+            return BadRequest(e.Message);
+        }
+        
+        return Ok("order price updated successfully");
+    }
+    
+    [HttpPatch("status")]
+    public IActionResult PatchStatus(int number, string newStatus)
+    {
+        var result = Read(number).Result;
+        if (result == null)
+        {
+            return BadRequest("order not found");
+        }
+
+        result.Status = newStatus;
+        try
+        {
+            Update(number, result).Wait();
+        }
+        catch (AggregateException e)
+        {
+            return BadRequest(e.Message);
+        }
+        
+        return Ok("order status updated successfully");
     }
 
     private static async Task DeleteOrder(int number)

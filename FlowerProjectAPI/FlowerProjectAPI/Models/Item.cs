@@ -4,11 +4,11 @@ namespace FlowerProjectAPI.Models;
 
 public class Item
 {
-    [Required] public string Name { get; }
+    [Required] public string Name { get; set; }
 
-    [Required] public decimal Price { get; }
+    [Required] public decimal Price { get; set; }
 
-    [Required] public int Count { get; }
+    [Required] public int Count { get; set; }
 
     public Item(string name, decimal price, int count)
     {

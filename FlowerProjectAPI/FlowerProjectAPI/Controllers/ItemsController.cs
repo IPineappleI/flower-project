@@ -53,7 +53,7 @@ public class ItemsController : ControllerBase
         return new Item(name!, price, count);
     }
 
-    private static async Task<Item?> Read(string name)
+    public static async Task<Item?> Read(string name)
     {
         const string commandText = "SELECT * FROM items WHERE name = @name";
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
@@ -116,6 +116,72 @@ public class ItemsController : ControllerBase
         }
 
         return Ok("item updated successfully");
+    }
+    
+    [HttpPatch("name")]
+    public IActionResult PatchName(string name, string newName)
+    {
+        var result = Read(name).Result;
+        if (result == null)
+        {
+            return BadRequest("item not found");
+        }
+
+        result.Name = newName;
+        try
+        {
+            Update(name, result).Wait();
+        }
+        catch (AggregateException e)
+        {
+            return BadRequest(e.Message);
+        }
+        
+        return Ok("item name updated successfully");
+    }
+    
+    [HttpPatch("price")]
+    public IActionResult PatchPrice(string name, decimal newPrice)
+    {
+        var result = Read(name).Result;
+        if (result == null)
+        {
+            return BadRequest("item not found");
+        }
+
+        result.Price = newPrice;
+        try
+        {
+            Update(name, result).Wait();
+        }
+        catch (AggregateException e)
+        {
+            return BadRequest(e.Message);
+        }
+        
+        return Ok("item price updated successfully");
+    }
+    
+    [HttpPatch("count")]
+    public IActionResult PatchCount(string name, int newCount)
+    {
+        var result = Read(name).Result;
+        if (result == null)
+        {
+            return BadRequest("item not found");
+        }
+
+        result.Count = newCount;
+        try
+        {
+            Update(name, result).Wait();
+        }
+        catch (AggregateException e)
+        {
+            return BadRequest(e.Message);
+        }
+        
+        return Ok("item count updated successfully");
     }
 
     private static async Task DeleteItem(string name)

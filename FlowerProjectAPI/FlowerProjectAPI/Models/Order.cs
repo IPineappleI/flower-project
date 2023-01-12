@@ -10,11 +10,11 @@ public class Order
 
     [Required] [EmailAddress] public string ClientEmail { get; }
 
-    [Required] public Dictionary<string, int> ShoppingCart { get; }
+    [Required] public Dictionary<string, int> ShoppingCart { get; set; }
 
-    [Required] public decimal Price { get; }
+    [Required] public decimal Price { get; set; }
 
-    [Required] public string Status { get; }
+    [Required] public string Status { get; set; }
 
     public Order(string clientEmail, Dictionary<string, int> shoppingCart, decimal price, string status,
         int? number = null, DateTime? dateAndTime = null)

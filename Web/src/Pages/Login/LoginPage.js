@@ -1,9 +1,13 @@
 import React from "react";
+import logo from "../../Logo/logo.png"
+import "./LoginPage.scss"
 
-function PrimalPage() {
+function LoginPage() {
   return (
-    <div className="PrimalPage">
+    <div className="LoginPage">
         <div className="main_authorization">
+            <img src={logo} alt="logo"></img>
+            <h3>Авторизация</h3><br/>
             <form>
                 <label>Логин: </label>
                 <input className="login" type="text" placeholder="введите ваш логин"></input><br />
@@ -20,4 +24,4 @@ function PrimalPage() {
   );
 }
 
-export default PrimalPage;
+export default LoginPage;

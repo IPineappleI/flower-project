@@ -12,14 +12,18 @@ public class ItemsController : ControllerBase
 {
     private static async Task Create(Item item)
     {
-        const string commandText = "INSERT INTO items (name, price, count) " +
-                                   "VALUES (@name, @price, @count)";
+        const string commandText = "INSERT INTO items (id, name, category_id, price, count, description, image) " +
+                                   "VALUES (@id, @name, @categoryId, @price, @count, @description, @image)";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
+        cmd.Parameters.AddWithValue("id", item.Id!);
         cmd.Parameters.AddWithValue("name", item.Name);
+        cmd.Parameters.AddWithValue("categoryId", item.CategoryId);
         cmd.Parameters.AddWithValue("price", item.Price);
         cmd.Parameters.AddWithValue("count", item.Count);
+        cmd.Parameters.AddWithValue("description", item.Description!);
+        cmd.Parameters.AddWithValue("image", item.Image!);
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -41,23 +45,29 @@ public class ItemsController : ControllerBase
             return BadRequest(e.Message);
         }
 
-        return Ok("item created successfully");
+        return Ok("item added successfully");
     }
 
     private static Item ReadItem(IDataRecord reader)
     {
+        var id = reader["id"] as int?;
         var name = reader["name"] as string;
+        var categoryId = reader["category_id"] as int? ?? 0;
         var price = reader["price"] as decimal? ?? 0;
         var count = reader["count"] as int? ?? 0;
+        var description = reader["description"] as string;
+        var image = reader["image"] as string;
 
-        return new Item(name!, price, count);
+        return new Item(name!, categoryId, price, count, id, description, image);
     }
 
-    public static async Task<Item?> Read(string name)
+    public static async Task<Item?> Read(int id)
     {
-        const string commandText = "SELECT * FROM items WHERE name = @name";
+        const string commandText = "SELECT * FROM items WHERE id = @id";
+
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
-        cmd.Parameters.AddWithValue("name", name);
+
+        cmd.Parameters.AddWithValue("id", id);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -70,33 +80,38 @@ public class ItemsController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Get(string name)
+    public IActionResult Get(int id)
     {
-        var result = Read(name).Result;
+        var result = Read(id).Result;
 
         return result == null ? BadRequest("item not found") : Ok(result);
     }
 
-    private static async Task Update(string name, Item item)
+    private static async Task Update(int id, Item item)
     {
         const string commandText = @"UPDATE items
-                SET name = @name, price = @price, count = @count
-                WHERE name = @oldName";
+                SET id = @id, name = @name, category_id = @categoryId, price = @price, count = @count, 
+                    description = @description, image = @image
+                WHERE id = @oldId";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
-        cmd.Parameters.AddWithValue("oldName", name);
+        cmd.Parameters.AddWithValue("oldId", id);
+        cmd.Parameters.AddWithValue("id", item.Id!);
         cmd.Parameters.AddWithValue("name", item.Name);
+        cmd.Parameters.AddWithValue("categoryId", item.CategoryId);
         cmd.Parameters.AddWithValue("price", item.Price);
         cmd.Parameters.AddWithValue("count", item.Count);
+        cmd.Parameters.AddWithValue("description", item.Description!);
+        cmd.Parameters.AddWithValue("image", item.Image!);
 
         await cmd.ExecuteNonQueryAsync();
     }
 
     [HttpPut]
-    public IActionResult Put(string name, Item item)
+    public IActionResult Put(int id, Item item)
     {
-        if (Get(name) is BadRequestObjectResult)
+        if (Get(id) is BadRequestObjectResult)
         {
             return BadRequest("item not found");
         }
@@ -108,7 +123,7 @@ public class ItemsController : ControllerBase
 
         try
         {
-            Update(name, item).Wait();
+            Update(id, item).Wait();
         }
         catch (AggregateException e)
         {
@@ -117,11 +132,11 @@ public class ItemsController : ControllerBase
 
         return Ok("item updated successfully");
     }
-    
+
     [HttpPatch("name")]
-    public IActionResult PatchName(string name, string newName)
+    public IActionResult PatchName(int id, string newName)
     {
-        var result = Read(name).Result;
+        var result = Read(id).Result;
         if (result == null)
         {
             return BadRequest("item not found");
@@ -130,20 +145,20 @@ public class ItemsController : ControllerBase
         result.Name = newName;
         try
         {
-            Update(name, result).Wait();
+            Update(id, result).Wait();
         }
         catch (AggregateException e)
         {
             return BadRequest(e.Message);
         }
-        
+
         return Ok("item name updated successfully");
     }
-    
+
     [HttpPatch("price")]
-    public IActionResult PatchPrice(string name, decimal newPrice)
+    public IActionResult PatchPrice(int id, decimal newPrice)
     {
-        var result = Read(name).Result;
+        var result = Read(id).Result;
         if (result == null)
         {
             return BadRequest("item not found");
@@ -152,20 +167,20 @@ public class ItemsController : ControllerBase
         result.Price = newPrice;
         try
         {
-            Update(name, result).Wait();
+            Update(id, result).Wait();
         }
         catch (AggregateException e)
         {
             return BadRequest(e.Message);
         }
-        
+
         return Ok("item price updated successfully");
     }
-    
+
     [HttpPatch("count")]
-    public IActionResult PatchCount(string name, int newCount)
+    public IActionResult PatchCount(int id, int newCount)
     {
-        var result = Read(name).Result;
+        var result = Read(id).Result;
         if (result == null)
         {
             return BadRequest("item not found");
@@ -174,35 +189,38 @@ public class ItemsController : ControllerBase
         result.Count = newCount;
         try
         {
-            Update(name, result).Wait();
+            Update(id, result).Wait();
         }
         catch (AggregateException e)
         {
             return BadRequest(e.Message);
         }
-        
+
         return Ok("item count updated successfully");
     }
 
-    private static async Task DeleteItem(string name)
+    private static async Task DeleteItem(int id)
     {
-        const string commandText = "DELETE FROM items WHERE name = (@name)";
+        const string commandText = "DELETE FROM items WHERE id = (@id)";
+        
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
-        cmd.Parameters.AddWithValue("name", name);
+        
+        cmd.Parameters.AddWithValue("id", id);
+        
         await cmd.ExecuteNonQueryAsync();
     }
 
     [HttpDelete]
-    public IActionResult Delete(string name)
+    public IActionResult Delete(int id)
     {
-        if (Get(name) is BadRequestObjectResult)
+        if (Get(id) is BadRequestObjectResult)
         {
             return BadRequest("item not found");
         }
 
         try
         {
-            DeleteItem(name).Wait();
+            DeleteItem(id).Wait();
         }
         catch (AggregateException e)
         {

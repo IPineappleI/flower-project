@@ -3,7 +3,6 @@ using System.Data;
 using FlowerProjectAPI.Models;
 using FlowerProjectAPI.Utility;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Npgsql;
 using Validator = FlowerProjectAPI.Utility.Validator;
 
@@ -15,16 +14,19 @@ public class UsersController : ControllerBase
 {
     private static async Task Create(User user)
     {
-        const string commandText = "INSERT INTO users (email, phone_number, password, role, shopping_cart) " +
-                                   "VALUES (@email, @phoneNumber, @password, @role, @shoppingCart)";
+        const string commandText = "INSERT INTO users (id, first_name, last_name, email, phone_number, password, role, shopping_cart_id) " +
+                                   "VALUES (@id, @firstName, @lastName, @email, @phoneNumber, @password, @role, @shoppingCartId)";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
+        cmd.Parameters.AddWithValue("id", user.Id!);
+        cmd.Parameters.AddWithValue("firstName", user.FirstName);
+        cmd.Parameters.AddWithValue("lastName", user.LastName!);
         cmd.Parameters.AddWithValue("email", user.Email);
         cmd.Parameters.AddWithValue("phoneNumber", user.PhoneNumber);
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
-        cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(user.ShoppingCart));
+        cmd.Parameters.AddWithValue("shoppingCartId", user.ShoppingCartId!);
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -51,20 +53,25 @@ public class UsersController : ControllerBase
 
     private static User ReadClient(IDataRecord reader)
     {
+        var id = reader["id"] as int?;
+        var firstName = reader["first_name"] as string;
+        var lastName = reader["last_name"] as string;
         var email = reader["email"] as string;
         var phoneNumber = reader["phone_number"] as string;
         var password = reader["password"] as string;
         var role = reader["role"] as string;
-        var shoppingCart = JsonConvert.DeserializeObject<Dictionary<string, int>>((reader["shopping_cart"] as string)!);
+        var shoppingCartId = reader["shopping_cart_id"] as int?;
 
-        return new User(email!, phoneNumber!, password!, role!, shoppingCart);
+        return new User(email!, phoneNumber!, password!, role!, firstName!, lastName, id, shoppingCartId);
     }
 
-    private static async Task<User?> Read(string email)
+    private static async Task<User?> Read(int id)
     {
-        const string commandText = "SELECT * FROM users WHERE email = @email";
+        const string commandText = "SELECT * FROM users WHERE id = @id";
+        
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
-        cmd.Parameters.AddWithValue("email", email);
+        
+        cmd.Parameters.AddWithValue("id", id);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -77,36 +84,39 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Get(string email)
+    public IActionResult Get(int id)
     {
-        var result = Read(email).Result;
+        var result = Read(id).Result;
 
         return result == null ? BadRequest("user not found") : Ok(result);
     }
 
-    private static async Task Update(string email, User user)
+    private static async Task Update(int id, User user)
     {
         const string commandText = @"UPDATE users
-                SET email = @email, phone_number = @phoneNumber, password = @password, role = @role, 
-                    shopping_cart = @shoppingCart
-                WHERE email = @oldEmail";
+                SET id = @id, first_name = @firstName, last_name = @lastName, email = @email, 
+                    phone_number = @phoneNumber, password = @password, role = @role, shopping_cart_id = @shoppingCartId
+                WHERE email = @oldId";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
-        cmd.Parameters.AddWithValue("oldEmail", email);
+        cmd.Parameters.AddWithValue("oldId", id);
+        cmd.Parameters.AddWithValue("id", user.Id!);
+        cmd.Parameters.AddWithValue("firstName", user.FirstName);
+        cmd.Parameters.AddWithValue("lastName", user.LastName!);
         cmd.Parameters.AddWithValue("email", user.Email);
         cmd.Parameters.AddWithValue("phoneNumber", user.PhoneNumber);
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
-        cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(user.ShoppingCart));
+        cmd.Parameters.AddWithValue("shoppingCartId", user.ShoppingCartId!);
 
         await cmd.ExecuteNonQueryAsync();
     }
 
     [HttpPut]
-    public IActionResult Put(string email, User user)
+    public IActionResult Put(int id, User user)
     {
-        if (Get(email) is BadRequestObjectResult)
+        if (Get(id) is BadRequestObjectResult)
         {
             return BadRequest("user not found");
         }
@@ -118,7 +128,7 @@ public class UsersController : ControllerBase
 
         try
         {
-            Update(email, user).Wait();
+            Update(id, user).Wait();
         }
         catch (AggregateException e)
         {
@@ -129,9 +139,9 @@ public class UsersController : ControllerBase
     }
 
     [HttpPatch("email")]
-    public IActionResult PatchEmail(string email, string newEmail)
+    public IActionResult PatchEmail(int id, string newEmail)
     {
-        var result = Read(email).Result;
+        var result = Read(id).Result;
         if (result == null)
         {
             return BadRequest("user not found");
@@ -146,7 +156,7 @@ public class UsersController : ControllerBase
         result.Email = newEmail;
         try
         {
-            Update(email, result).Wait();
+            Update(id, result).Wait();
         }
         catch (AggregateException e)
         {
@@ -157,9 +167,9 @@ public class UsersController : ControllerBase
     }
     
     [HttpPatch("phoneNumber")]
-    public IActionResult PatchPhoneNumber(string email, string newPhoneNumber)
+    public IActionResult PatchPhoneNumber(int id, string newPhoneNumber)
     {
-        var result = Read(email).Result;
+        var result = Read(id).Result;
         if (result == null)
         {
             return BadRequest("user not found");
@@ -174,7 +184,7 @@ public class UsersController : ControllerBase
         result.PhoneNumber = newPhoneNumber;
         try
         {
-            Update(email, result).Wait();
+            Update(id, result).Wait();
         }
         catch (AggregateException e)
         {
@@ -185,9 +195,9 @@ public class UsersController : ControllerBase
     }
     
     [HttpPatch("password")]
-    public IActionResult PatchPassword(string email, string newPassword)
+    public IActionResult PatchPassword(int id, string newPassword)
     {
-        var result = Read(email).Result;
+        var result = Read(id).Result;
         if (result == null)
         {
             return BadRequest("user not found");
@@ -202,7 +212,7 @@ public class UsersController : ControllerBase
         result.Password = newPassword;
         try
         {
-            Update(email, result).Wait();
+            Update(id, result).Wait();
         }
         catch (AggregateException e)
         {
@@ -213,9 +223,9 @@ public class UsersController : ControllerBase
     }
     
     [HttpPatch("role")]
-    public IActionResult PatchRole(string email, string newRole)
+    public IActionResult PatchRole(int id, string newRole)
     {
-        var result = Read(email).Result;
+        var result = Read(id).Result;
         if (result == null)
         {
             return BadRequest("user not found");
@@ -230,7 +240,7 @@ public class UsersController : ControllerBase
         result.Role = newRole;
         try
         {
-            Update(email, result).Wait();
+            Update(id, result).Wait();
         }
         catch (AggregateException e)
         {
@@ -241,9 +251,9 @@ public class UsersController : ControllerBase
     }
     
     [HttpPatch("shoppingCart")]
-    public IActionResult PatchShoppingCart(string email, Dictionary<string, int> newShoppingCart)
+    public IActionResult PatchShoppingCartId(int id, int newShoppingCartId)
     {
-        var result = Read(email).Result;
+        var result = Read(id).Result;
         if (result == null)
         {
             return BadRequest("user not found");
@@ -254,16 +264,10 @@ public class UsersController : ControllerBase
             return BadRequest("only clients can have a shopping cart");
         }
 
-        var roleValidationResult = Validator.ValidateShoppingCart(newShoppingCart);
-        if (roleValidationResult != ValidationResult.Success)
-        {
-            return BadRequest(roleValidationResult!.ErrorMessage);
-        }
-
-        result.ShoppingCart = newShoppingCart;
+        result.ShoppingCartId = newShoppingCartId;
         try
         {
-            Update(email, result).Wait();
+            Update(id, result).Wait();
         }
         catch (AggregateException e)
         {
@@ -273,25 +277,25 @@ public class UsersController : ControllerBase
         return Ok("client shopping cart updated successfully");
     }
 
-    private static async Task DeleteClient(string email)
+    private static async Task DeleteClient(int id)
     {
-        const string commandText = "DELETE FROM users WHERE email = (@email)";
+        const string commandText = "DELETE FROM users WHERE id = (@id)";
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
-        cmd.Parameters.AddWithValue("email", email);
+        cmd.Parameters.AddWithValue("id", id);
         await cmd.ExecuteNonQueryAsync();
     }
 
     [HttpDelete]
-    public IActionResult Delete(string email)
+    public IActionResult Delete(int id)
     {
-        if (Get(email) is BadRequestObjectResult)
+        if (Get(id) is BadRequestObjectResult)
         {
             return BadRequest("user not found");
         }
 
         try
         {
-            DeleteClient(email).Wait();
+            DeleteClient(id).Wait();
         }
         catch (AggregateException e)
         {

@@ -5,6 +5,12 @@ namespace FlowerProjectAPI.Models;
 
 public class User
 {
+    public int? Id { get; set; }
+
+    [Required] public string FirstName { get; set; }
+
+    public string? LastName { get; set; }
+
     [Required] [EmailAddress] public string Email { get; set; }
 
     [Required] [Phone] public string PhoneNumber { get; set; }
@@ -17,22 +23,24 @@ public class User
     [CustomValidation(typeof(Validator), "ValidateRole")]
     public string Role { get; set; }
 
-    [CustomValidation(typeof(Validator), "ValidateShoppingCart")]
-    public Dictionary<string, int> ShoppingCart { get; set; }
+    public int? ShoppingCartId { get; set; }
 
-    public User(string email, string phoneNumber, string password, string role,
-        Dictionary<string, int>? shoppingCart = null)
+    public User(string email, string phoneNumber, string password, string role, string firstName,
+        string? lastName = null, int? id = null, int? shoppingCartId = null)
     {
+        Id = id;
+        FirstName = firstName;
+        LastName = lastName;
         Email = email;
         PhoneNumber = phoneNumber;
         Password = password;
         Role = role;
-        
+
         if (role != "client")
         {
-            shoppingCart = null;
+            shoppingCartId = null;
         }
 
-        ShoppingCart = shoppingCart ?? new Dictionary<string, int>();
+        ShoppingCartId = shoppingCartId;
     }
 }

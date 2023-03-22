@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FlowerProjectAPI.Controllers;
-using FlowerProjectAPI.Models;
 
 namespace FlowerProjectAPI.Utility;
 
@@ -14,25 +13,26 @@ public static class Validator
     public static ValidationResult? ValidateRole(string role) =>
         role is "client" or "manager" or "admin"
             ? ValidationResult.Success
-            : new ValidationResult("no such role exists");
+            : new ValidationResult($"invalid role name ({role})");
 
-    public static ValidationResult? ValidateShoppingCart(Dictionary<string, int> shoppingCart)
+    public static ValidationResult? ValidateShoppingCart(Dictionary<int, int> shoppingCart)
     {
-        foreach (var itemNameCountPair in shoppingCart)
+        foreach (var itemIdCountPair in shoppingCart)
         {
-            var item = ItemsController.Read(itemNameCountPair.Key).Result;
-            
+            var item = ItemsController.Read(itemIdCountPair.Key).Result;
+
             if (item == null)
             {
-                return new ValidationResult("no such item in store");
+                return new ValidationResult($"invalid item id in shopping cart ({itemIdCountPair.Key})");
             }
-            
-            if (itemNameCountPair.Value > item.Count)
+
+            if (itemIdCountPair.Value > item.Count)
             {
-                return new ValidationResult("not enough items in store");
+                return new ValidationResult($"not enough items with id {itemIdCountPair.Key} " +
+                                            $"in store ({itemIdCountPair.Value}/{item.Count})");
             }
         }
-        
+
         return ValidationResult.Success;
     }
 }

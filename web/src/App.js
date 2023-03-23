@@ -6,7 +6,6 @@ import UsersList from "./Pages/UsersList/UsersList";
 import ProductsList from "./Pages/ProductsList/ProductsList";
 import SingleUser from "./Pages/SingleUser/SingleUser";
 import NewUser from "./Pages/NewUser/NewUser";
-import Users from "./Components/Users";
 
 function App() {
     return (

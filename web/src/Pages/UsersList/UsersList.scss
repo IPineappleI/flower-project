@@ -1,0 +1,20 @@
+.list {
+  display: flex;
+  width: 100%;
+
+  .listContainer {
+    flex: 6;
+
+    .datatable {
+      padding: 10px;
+      text-align: center;
+
+      .listTitle {
+        font-weight: 500;
+        color: gray;
+        margin-bottom: 15px;
+        margin-top: 15px;
+      }
+    }
+  }
+}

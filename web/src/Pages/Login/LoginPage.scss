@@ -1,0 +1,35 @@
+.LoginPage {
+  justify-content: center;
+  text-align: center;
+  margin-top: 80px;
+  font-size: larger;
+  line-height: 1.3;
+
+  .main_authorization {
+    width: max-content;
+    -webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
+    box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+  }
+
+  .login {
+    height: 25px;
+    width: 150px;
+    padding-left: 15px;
+    border-radius: 10px;
+  }
+
+  .password {
+    height: 25px;
+    width: 150px;
+    padding-left: 20px;
+    border-radius: 10px;
+  }
+
+  .Enter {
+    border-radius: 10px;
+    height: 50px;
+    width: 150px;
+    font-size: medium;
+    cursor: pointer;
+  }
+}

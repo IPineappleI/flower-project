@@ -10,7 +10,7 @@ export default class TestAPI extends Component {
     }
 
     componentDidMount() {
-        Axios.get("https://localhost:7153")
+        Axios.get("https://localhost:7153/Users/byId/1")
             .then(
                 (json) => {
                     console.log(json.data);

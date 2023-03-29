@@ -3,20 +3,20 @@ import Axios from 'axios';
 
 function TestAPI() {
 
-    const [UserName, setUserName] = useState([])
+    const [UserName, setUserName] = useState("")
 
     const fetchData = () => {
         Axios.get("https://localhost:7153/Users/byId?id=1")
             .then(
                 (res) => {
-                    setUserName(res.data);
+                    setUserName(res.data.name);
                 });
     };
 
     return (
         <div className="TestApi">
             <button onClick={fetchData}> Get user 1 name</button>
-            {UserName.r}
+            {UserName}
         </div>
     );
 }

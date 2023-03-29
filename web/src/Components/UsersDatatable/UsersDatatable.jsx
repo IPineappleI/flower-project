@@ -10,7 +10,7 @@ const columns = [
     {field: 'email', headerName: "Client's Email", width: 150},
     {field: 'phoneNumber', headerName: 'Phone number', width: 115},
     {field: 'role', headerName: "Role", width: 70},
-    {field: 'shoppingCartId', headerName: "Shopping cart id", width: 150},
+    {field: 'shoppingCartId', headerName: "Shopping cart id", width: 50},
 ];
 
 const UsersDatatable = () => {

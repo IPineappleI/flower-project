@@ -50,8 +50,33 @@ public class CategoriesController : ControllerBase
 
         return new Category(name!, id);
     }
+    
+    private static async Task<List<Category>?> Read()
+    {
+        var categories = new List<Category>();
+        
+        const string commandText = "SELECT * FROM categories";
 
-    public static async Task<Category?> Read(int id)
+        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            categories.Add(ReadCategory(reader));
+        }
+
+        return categories;
+    }
+    
+    [HttpGet]
+    public IActionResult Get()
+    {
+        var result = Read().Result;
+
+        return result == null ? BadRequest("categories not found") : Ok(result);
+    }
+
+    public static async Task<Category?> ReadById(int id)
     {
         const string commandText = "SELECT * FROM categories WHERE id = @id";
 
@@ -69,10 +94,10 @@ public class CategoriesController : ControllerBase
         return null;
     }
 
-    [HttpGet]
+    [HttpGet("byId")]
     public IActionResult Get(int id)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
 
         return result == null ? BadRequest("category not found") : Ok(result);
     }
@@ -120,7 +145,7 @@ public class CategoriesController : ControllerBase
     [HttpPatch("name")]
     public IActionResult PatchName(int id, string newName)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
         if (result == null)
         {
             return BadRequest("category not found");

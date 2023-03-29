@@ -52,7 +52,7 @@ public class UsersController : ControllerBase
         return Ok("user created successfully");
     }
 
-    private static User ReadClient(IDataRecord reader)
+    private static User ReadUser(IDataRecord reader)
     {
         var id = reader["id"] as int?;
         var firstName = reader["first_name"] as string;
@@ -77,7 +77,7 @@ public class UsersController : ControllerBase
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            users.Add(ReadClient(reader));
+            users.Add(ReadUser(reader));
         }
 
         return users;
@@ -102,7 +102,7 @@ public class UsersController : ControllerBase
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            var client = ReadClient(reader);
+            var client = ReadUser(reader);
             return client;
         }
 
@@ -128,7 +128,7 @@ public class UsersController : ControllerBase
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            var client = ReadClient(reader);
+            var client = ReadUser(reader);
             return client;
         }
 
@@ -166,7 +166,7 @@ public class UsersController : ControllerBase
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            var client = ReadClient(reader);
+            var client = ReadUser(reader);
             return client;
         }
 
@@ -379,7 +379,7 @@ public class UsersController : ControllerBase
         return Ok("client shopping cart updated successfully");
     }
 
-    private static async Task DeleteClient(int id)
+    private static async Task DeleteUser(int id)
     {
         const string commandText = "DELETE FROM users WHERE id = (@id)";
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
@@ -397,7 +397,7 @@ public class UsersController : ControllerBase
 
         try
         {
-            DeleteClient(id).Wait();
+            DeleteUser(id).Wait();
         }
         catch (AggregateException e)
         {

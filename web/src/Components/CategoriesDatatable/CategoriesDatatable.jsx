@@ -1,26 +1,21 @@
-import "./UsersDatatable.scss"
+import "./CategoriesDatatable.scss"
 import {DataGrid} from '@mui/x-data-grid';
 import React, {useState} from "react";
 import Axios from "axios";
 
 const columns = [
     {field: 'id', headerName: 'ID', width: 50},
-    {field: 'firstName', headerName: 'First name', width: 100},
-    {field: 'lastName', headerName: 'Last name', width: 100},
-    {field: 'email', headerName: "Client's Email", width: 150},
-    {field: 'phoneNumber', headerName: 'Phone number', width: 115},
-    {field: 'role', headerName: "Role", width: 70},
-    {field: 'shoppingCartId', headerName: "Shopping cart id", width: 150},
+    {field: 'name', headerName: 'Name', width: 100},
 ];
 
-const UsersDatatable = () => {
+const CategoriesDatatable = () => {
 
-    const [users, setUsers] = useState([]);
+    const [categories, setCategories] = useState([]);
 
-    Axios.get("https://localhost:7153/Users")
+    Axios.get("https://localhost:7153/Categories")
         .then(
             (res) => {
-                setUsers(res.data);
+                setCategories(res.data);
             });
 
     const actionColumn = [
@@ -41,7 +36,7 @@ const UsersDatatable = () => {
     return (
         <div className="datatable">
             <DataGrid
-                rows={users}
+                rows={categories}
                 columns={columns.concat(actionColumn)}
                 pageSize={10}
                 rowsPerPageOptions={[10]}
@@ -51,4 +46,4 @@ const UsersDatatable = () => {
     )
 }
 
-export default UsersDatatable
+export default CategoriesDatatable

@@ -7,7 +7,7 @@ import ProductsList from "./Pages/ProductsList/ProductsList";
 import SingleUser from "./Pages/SingleUser/SingleUser";
 import NewUser from "./Pages/NewUser/NewUser";
 import React, {useState} from "react";
-import TestAPI from "./Components/TestAPI";
+import CategoriesList from "./Pages/CategoriesList/CategoriesList";
 
 function App() {
     return (
@@ -24,6 +24,7 @@ function App() {
                             <Route path="new" element={<NewUser/>}></Route>
                         </Route>
                         <Route path="products" element={<ProductsList/>}/>
+                        <Route path="categories" element={<CategoriesList/>}/>
                     </Route>
                 </Routes>
             </BrowserRouter>

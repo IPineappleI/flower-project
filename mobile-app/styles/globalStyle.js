@@ -8,6 +8,7 @@ export const globalStyle = StyleSheet.create({
     title: {
         fontSize: 20,
         color: '#333',
-        fontFamily: 'os-bold'
+        fontFamily: 'os-bold',
+        textAlign: 'center'
     }
 });

@@ -59,8 +59,33 @@ public class OrdersController : ControllerBase
 
         return new Order(clientId, shoppingCart!, price, status!, id, dateAndTime);
     }
+    
+    private static async Task<List<Order>?> Read()
+    {
+        var orders = new List<Order>();
+        
+        const string commandText = "SELECT * FROM orders";
 
-    private static async Task<Order?> Read(int id)
+        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            orders.Add(ReadOrder(reader));
+        }
+
+        return orders;
+    }
+    
+    [HttpGet]
+    public IActionResult Get()
+    {
+        var result = Read().Result;
+
+        return result == null ? BadRequest("orders not found") : Ok(result);
+    }
+
+    private static async Task<Order?> ReadById(int id)
     {
         const string commandText = "SELECT * FROM orders WHERE id = @id";
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
@@ -76,10 +101,10 @@ public class OrdersController : ControllerBase
         return null;
     }
 
-    [HttpGet]
+    [HttpGet("byId")]
     public IActionResult Get(int id)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
 
         return result == null ? BadRequest("order not found") : Ok(result);
     }
@@ -132,7 +157,7 @@ public class OrdersController : ControllerBase
     [HttpPatch("shoppingCart")]
     public IActionResult PatchShoppingCart(int id, Dictionary<int, int> newShoppingCart)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
         if (result == null)
         {
             return BadRequest("order not found");
@@ -160,7 +185,7 @@ public class OrdersController : ControllerBase
     [HttpPatch("price")]
     public IActionResult PatchPrice(int id, decimal newPrice)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
         if (result == null)
         {
             return BadRequest("order not found");
@@ -182,7 +207,7 @@ public class OrdersController : ControllerBase
     [HttpPatch("status")]
     public IActionResult PatchStatus(int id, string newStatus)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
         if (result == null)
         {
             return BadRequest("order not found");

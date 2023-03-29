@@ -19,7 +19,7 @@ public static class Validator
     {
         foreach (var itemIdCountPair in shoppingCart)
         {
-            var item = ItemsController.Read(itemIdCountPair.Key).Result;
+            var item = ItemsController.ReadById(itemIdCountPair.Key).Result;
 
             if (item == null)
             {

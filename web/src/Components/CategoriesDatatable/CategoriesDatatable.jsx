@@ -1,26 +1,21 @@
-import "./ProductsDatatable.scss"
+import "./CategoriesDatatable.scss"
 import {DataGrid} from '@mui/x-data-grid';
 import React, {useState} from "react";
 import Axios from "axios";
 
 const columns = [
     {field: 'id', headerName: 'Id', width: 100},
-    {field: 'name', headerName: 'Name', width: 250},
-    {field: 'categoryId', headerName: 'Category id', width: 100},
-    {field: 'price', headerName: 'Price', width: 120},
-    {field: 'count', headerName: "Count", width: 120},
-    {field: 'description', headerName: "Description", width: 400},
-    {field: 'image', headerName: "Image", width: 250},
+    {field: 'name', headerName: 'Name', width: 200},
 ];
 
-const ProductsDatatable = () => {
+const CategoriesDatatable = () => {
 
-    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
 
-    Axios.get("https://localhost:7153/Items")
+    Axios.get("https://localhost:7153/Categories")
         .then(
             (res) => {
-                setProducts(res.data);
+                setCategories(res.data);
             });
 
     const actionColumn = [
@@ -41,7 +36,7 @@ const ProductsDatatable = () => {
     return (
         <div className="datatable">
             <DataGrid
-                rows={products}
+                rows={categories}
                 columns={columns.concat(actionColumn)}
                 pageSize={10}
                 rowsPerPageOptions={[10]}
@@ -51,4 +46,4 @@ const ProductsDatatable = () => {
     )
 }
 
-export default ProductsDatatable
+export default CategoriesDatatable

@@ -60,8 +60,33 @@ public class ItemsController : ControllerBase
 
         return new Item(name!, categoryId, price, count, id, description, image);
     }
+    
+    private static async Task<List<Item>?> Read()
+    {
+        var items = new List<Item>();
+        
+        const string commandText = "SELECT * FROM items";
 
-    public static async Task<Item?> Read(int id)
+        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            items.Add(ReadItem(reader));
+        }
+
+        return items;
+    }
+    
+    [HttpGet]
+    public IActionResult Get()
+    {
+        var result = Read().Result;
+
+        return result == null ? BadRequest("items not found") : Ok(result);
+    }
+
+    public static async Task<Item?> ReadById(int id)
     {
         const string commandText = "SELECT * FROM items WHERE id = @id";
 
@@ -79,10 +104,10 @@ public class ItemsController : ControllerBase
         return null;
     }
 
-    [HttpGet]
+    [HttpGet("byId")]
     public IActionResult Get(int id)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
 
         return result == null ? BadRequest("item not found") : Ok(result);
     }
@@ -136,7 +161,7 @@ public class ItemsController : ControllerBase
     [HttpPatch("name")]
     public IActionResult PatchName(int id, string newName)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
         if (result == null)
         {
             return BadRequest("item not found");
@@ -158,7 +183,7 @@ public class ItemsController : ControllerBase
     [HttpPatch("price")]
     public IActionResult PatchPrice(int id, decimal newPrice)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
         if (result == null)
         {
             return BadRequest("item not found");
@@ -180,7 +205,7 @@ public class ItemsController : ControllerBase
     [HttpPatch("count")]
     public IActionResult PatchCount(int id, int newCount)
     {
-        var result = Read(id).Result;
+        var result = ReadById(id).Result;
         if (result == null)
         {
             return BadRequest("item not found");

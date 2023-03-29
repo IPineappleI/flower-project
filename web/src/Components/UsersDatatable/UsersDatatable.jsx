@@ -1,43 +1,28 @@
 import "./UsersDatatable.scss"
-import { DataGrid } from '@mui/x-data-grid';
+import {DataGrid} from '@mui/x-data-grid';
+import React, {useState} from "react";
+import Axios from "axios";
 
 const columns = [
-    { field: 'id', headerName: 'ID', width: 50 },
+    {field: 'id', headerName: 'ID', width: 50},
     {field: 'firstName', headerName: 'First name', width: 100},
     {field: 'lastName', headerName: 'Last name', width: 100},
-    { field: 'phoneNumber', headerName: 'Phone number', width: 115 },
-    { field: 'email', headerName: "Client's Email", width: 150 },
-    { field: 'role', headerName: "Role", width: 70 },
-];
-
-const rows = [
-    {
-        id: 1,
-        firstName: 'Ivan',
-        lastName: 'Davydov',
-        phoneNumber: 88005553535,
-        email: 'client1@mail.com',
-        role: 1,
-    },
-    {
-        id: 2,
-        firstName: 'Mark',
-        lastName: 'Bobrov',
-        phoneNumber: 88005555535,
-        email: 'client2@mail.com',
-        role: 1,
-    },
-    {
-        id: 3,
-        firstName: 'Egor',
-        lastName: 'Petrov',
-        phoneNumber: 88005555555,
-        email: 'client3@mail.com',
-        role: 1,
-    },
+    {field: 'email', headerName: "Client's Email", width: 150},
+    {field: 'phoneNumber', headerName: 'Phone number', width: 115},
+    {field: 'role', headerName: "Role", width: 70},
+    {field: 'shoppingCartId', headerName: "Shopping cart id", width: 50},
 ];
 
 const UsersDatatable = () => {
+
+    const [users, setUsers] = useState([]);
+
+    Axios.get("https://localhost:7153/Users")
+        .then(
+            (res) => {
+                setUsers(res.data);
+            });
+
     const actionColumn = [
         {
             field: 'action',
@@ -56,7 +41,7 @@ const UsersDatatable = () => {
     return (
         <div className="datatable">
             <DataGrid
-                rows={rows}
+                rows={users}
                 columns={columns.concat(actionColumn)}
                 pageSize={10}
                 rowsPerPageOptions={[10]}

@@ -65,6 +65,31 @@ public class UsersController : ControllerBase
 
         return new User(email!, phoneNumber!, password!, role!, firstName!, lastName, id, shoppingCartId);
     }
+    
+    private static async Task<List<User>?> Read()
+    {
+        var users = new List<User>();
+        
+        const string commandText = "SELECT * FROM users";
+
+        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            users.Add(ReadClient(reader));
+        }
+
+        return users;
+    }
+    
+    [HttpGet]
+    public IActionResult Get()
+    {
+        var result = Read().Result;
+
+        return result == null ? BadRequest("users not found") : Ok(result);
+    }
 
     private static async Task<User?> ReadById(int id)
     {

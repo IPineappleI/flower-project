@@ -3,13 +3,14 @@ import Axios from 'axios';
 
 function TestAPI() {
 
-    const [UserName, setUserName] = useState("")
+    const [UserName, setUserName] = useState("-")
 
     const fetchData = () => {
         Axios.get("https://localhost:7153/Users/byId?id=1")
             .then(
                 (res) => {
-                    setUserName(res.data.name);
+                    setUserName(res.data.firstName);
+                    console.log(res.data);
                 });
     };
 

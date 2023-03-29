@@ -8,26 +8,11 @@ export default class TestAPI extends Component {
             items: [],
         }
     }
-     config = {
-        url: "https://localhost:7153/Users/byId/1",
-        method: "get",
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        }
-    };
+
     componentDidMount() {
-        // Axios.get("https://localhost:7153/Users/byId/1", this.config)
-        //     .then(
-        //         (json) => {
-        //             console.log(json.data);
-        //         // this.setState({
-        //         //     items: json.data.drinks
-        //         // });
-        //     })
-        let response = Axios.request(this.config);
-        console.log(response);
+        Axios.get("https://localhost:7153/Users/byId?id=1").then(json => {
+            console.log(json);
+        });
     }
 
     render() {

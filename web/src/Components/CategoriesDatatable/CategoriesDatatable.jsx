@@ -4,8 +4,8 @@ import React, {useState} from "react";
 import Axios from "axios";
 
 const columns = [
-    {field: 'id', headerName: 'ID', width: 50},
-    {field: 'name', headerName: 'Name', width: 100},
+    {field: 'id', headerName: 'Id', width: 100},
+    {field: 'name', headerName: 'Name', width: 200},
 ];
 
 const CategoriesDatatable = () => {

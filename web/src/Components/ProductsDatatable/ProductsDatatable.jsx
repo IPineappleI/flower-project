@@ -5,12 +5,12 @@ import Axios from "axios";
 
 const columns = [
     {field: 'id', headerName: 'Id', width: 100},
-    {field: 'name', headerName: 'Name', width: 120},
+    {field: 'name', headerName: 'Name', width: 250},
     {field: 'categoryId', headerName: 'Category id', width: 100},
-    {field: 'price', headerName: 'Price', width: 100},
-    {field: 'count', headerName: "Count", width: 100},
-    {field: 'description', headerName: "Description", width: 120},
-    {field: 'image', headerName: "Image", width: 100},
+    {field: 'price', headerName: 'Price', width: 120},
+    {field: 'count', headerName: "Count", width: 120},
+    {field: 'description', headerName: "Description", width: 400},
+    {field: 'image', headerName: "Image", width: 250},
 ];
 
 const ProductsDatatable = () => {

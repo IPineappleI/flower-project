@@ -4,12 +4,12 @@ import React, {useState} from "react";
 import Axios from "axios";
 
 const columns = [
-    { field: 'id', headerName: 'Order id', width: 115 },
-    { field: 'dateAndTime', headerName: 'Date and time', width: 150 },
-    { field: 'clientId', headerName: 'Client id', width: 115 },
-    { field: 'shoppingCart', headerName: 'Shopping cart', width: 115 },
-    { field: 'price', headerName: 'Order price', width: 100 },
-    { field: 'status', headerName: 'Status', width: 110 },
+    { field: 'id', headerName: 'Id', width: 100 },
+    { field: 'dateAndTime', headerName: 'Date and time', width: 250 },
+    { field: 'clientId', headerName: 'Client id', width: 100 },
+    { field: 'shoppingCart', headerName: 'Shopping cart', width: 400 },
+    { field: 'price', headerName: 'Order price', width: 150 },
+    { field: 'status', headerName: 'Status', width: 200 },
 ];
 
 const OrdersDatatable = () => {

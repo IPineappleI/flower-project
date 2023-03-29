@@ -4,13 +4,13 @@ import React, {useState} from "react";
 import Axios from "axios";
 
 const columns = [
-    {field: 'id', headerName: 'ID', width: 50},
-    {field: 'firstName', headerName: 'First name', width: 100},
-    {field: 'lastName', headerName: 'Last name', width: 100},
-    {field: 'email', headerName: "Client's Email", width: 150},
-    {field: 'phoneNumber', headerName: 'Phone number', width: 115},
-    {field: 'role', headerName: "Role", width: 70},
-    {field: 'shoppingCartId', headerName: "Shopping cart id", width: 50},
+    {field: 'id', headerName: 'Id', width: 100},
+    {field: 'firstName', headerName: 'First name', width: 150},
+    {field: 'lastName', headerName: 'Last name', width: 150},
+    {field: 'email', headerName: "Client's email", width: 200},
+    {field: 'phoneNumber', headerName: 'Phone number', width: 150},
+    {field: 'role', headerName: "Role", width: 100},
+    {field: 'shoppingCartId', headerName: "Shopping cart id", width: 150},
 ];
 
 const UsersDatatable = () => {

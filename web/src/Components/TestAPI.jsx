@@ -1,38 +1,24 @@
-import React, {Component, useState} from "react";
+import React, {useState} from "react";
 import Axios from 'axios';
 
-export default class TestAPI extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            items: [],
-        }
-    }
+function TestAPI() {
 
-    componentDidMount() {
+    const [UserName, setUserName] = useState("")
+
+    const fetchData = () => {
         Axios.get("https://localhost:7153/Users/byId?id=1")
             .then(
-                (json) => {
-                    this.setState({
-                        items: json.data
-                    });
-                })
-    }
+                (res) => {
+                    setUserName(res.data.name);
+                });
+    };
 
-    render() {
-        const { items } = this.state;
-
-        return (
-            <p> {items.name} </p>
-        )
-    }
-
+    return (
+        <div className="TestApi">
+            <button onClick={fetchData}> Get user 1 name</button>
+            {UserName}
+        </div>
+    );
 }
 
-
-{/*<button onClick={getJoke}> Press to impress) </button>*/
-}
-{/*{items.map(item => {*/
-}
-{/*})}*/
-}
+export default TestAPI;

@@ -13,14 +13,14 @@ const columns = [
     {field: 'image', headerName: "Image", width: 250},
 ];
 
-export function ProductsDatatable() {
+const [products, setProducts] = useState([]);
 
-    const [products, setProducts] = useState([]);
+export function ProductsDatatable() {
 
     Axios.get("https://localhost:7153/Items")
         .then(
             (res) => {
-                setProducts(res.data);
+                setProducts(res?.data);
             });
 
     const actionColumn = [

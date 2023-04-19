@@ -13,14 +13,14 @@ const columns = [
     {field: 'shoppingCartId', headerName: "Shopping cart id", width: 150},
 ];
 
-export function UsersDatatable() {
+const [users, setUsers] = useState([]);
 
-    const [users, setUsers] = useState([]);
+export function UsersDatatable() {
 
     Axios.get("https://localhost:7153/Users")
         .then(
             (res) => {
-                setUsers(res.data);
+                setUsers(res?.data);
             });
 
     const actionColumn = [

@@ -12,14 +12,14 @@ const columns = [
     { field: 'status', headerName: 'Status', width: 200 },
 ];
 
-export function OrdersDatatable() {
+const [orders, setOrders] = useState([]);
 
-     const [orders, setOrders] = useState([]);
+export function OrdersDatatable() {
 
     Axios.get("https://localhost:7153/Orders")
         .then(
             (res) => {
-                setOrders(res.data);
+                setOrders(res?.data);
             });
 
     const actionColumn = [

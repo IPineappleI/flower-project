@@ -8,14 +8,14 @@ const columns = [
     {field: 'name', headerName: 'Name', width: 200},
 ];
 
-export function CategoriesDatatable() {
+const [categories, setCategories] = useState([]);
 
-    const [categories, setCategories] = useState([]);
+export function CategoriesDatatable() {
 
     Axios.get("https://localhost:7153/Categories")
         .then(
             (res) => {
-                setCategories(res.data);
+                setCategories(res?.data);
             });
 
     const actionColumn = [

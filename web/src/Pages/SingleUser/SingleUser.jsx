@@ -1,7 +1,7 @@
 import "./SingleUser.scss"
 import SideBar from "../../Components/SideBar/SideBar";
 import NavBar from "../../Components/NavBar/NavBar";
-import OrdersDatatable from "../../Components/OrdersDatatable/OrdersDatatable";
+import {OrdersDatatable} from "../../Components/OrdersDatatable/OrdersDatatable";
 
 const SingleUser = () => {
     return (

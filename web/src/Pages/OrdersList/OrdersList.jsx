@@ -1,10 +1,10 @@
 import "./OrdersList.scss"
 import SideBar from "../../Components/SideBar/SideBar";
 import "../../Components/SideBar/SideBar.scss"
-import OrdersDatatable from "../../Components/OrdersDatatable/OrdersDatatable";
+import {OrdersDatatable} from "../../Components/OrdersDatatable/OrdersDatatable";
 import NavBar from "../../Components/NavBar/NavBar";
 
-const OrdersList = () => {
+export const OrdersList = () => {
     return (
         <div className="list">
             <SideBar/>
@@ -18,5 +18,3 @@ const OrdersList = () => {
         </div>
     )
 }
-
-export default OrdersList

@@ -2,9 +2,9 @@ import "./UsersList.scss"
 import SideBar from "../../Components/SideBar/SideBar";
 import "../../Components/SideBar/SideBar.scss"
 import NavBar from "../../Components/NavBar/NavBar";
-import UsersDatatable from "../../Components/UsersDatatable/UsersDatatable";
+import {UsersDatatable} from "../../Components/UsersDatatable/UsersDatatable";
 
-const UsersList = () => {
+export const UsersList = () => {
     return (
         <div className="list">
             <SideBar/>
@@ -18,5 +18,3 @@ const UsersList = () => {
         </div>
     )
 }
-
-export default UsersList

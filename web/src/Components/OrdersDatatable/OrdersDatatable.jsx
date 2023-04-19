@@ -12,7 +12,7 @@ const columns = [
     { field: 'status', headerName: 'Status', width: 200 },
 ];
 
-const OrdersDatatable = () => {
+export const OrdersDatatable = () => {
 
     const [orders, setOrders] = useState([]);
 
@@ -49,5 +49,3 @@ const OrdersDatatable = () => {
         </div>
     )
 }
-
-export default OrdersDatatable

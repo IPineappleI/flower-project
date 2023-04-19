@@ -13,7 +13,7 @@ const columns = [
     {field: 'image', headerName: "Image", width: 250},
 ];
 
-const ProductsDatatable = () => {
+export const ProductsDatatable = () => {
 
     const [products, setProducts] = useState([]);
 
@@ -50,5 +50,3 @@ const ProductsDatatable = () => {
         </div>
     )
 }
-
-export default ProductsDatatable

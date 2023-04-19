@@ -8,7 +8,7 @@ const columns = [
     {field: 'name', headerName: 'Name', width: 200},
 ];
 
-const CategoriesDatatable = () => {
+export const CategoriesDatatable = () => {
 
     const [categories, setCategories] = useState([]);
 
@@ -45,5 +45,3 @@ const CategoriesDatatable = () => {
         </div>
     )
 }
-
-export default CategoriesDatatable

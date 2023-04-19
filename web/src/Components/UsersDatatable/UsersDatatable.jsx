@@ -13,7 +13,7 @@ const columns = [
     {field: 'shoppingCartId', headerName: "Shopping cart id", width: 150},
 ];
 
-const UsersDatatable = () => {
+export const UsersDatatable = () => {
 
     const [users, setUsers] = useState([]);
 
@@ -50,5 +50,3 @@ const UsersDatatable = () => {
         </div>
     )
 }
-
-export default UsersDatatable

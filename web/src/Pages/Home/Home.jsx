@@ -4,7 +4,7 @@ import NavBar from "../../Components/NavBar/NavBar";
 import Widget from "../../Components/Widget/Widget";
 import Featured from "../../Components/Featured/Featured";
 import Chart from "../../Components/chart/Chart";
-import OrdersDatatable from "../../Components/OrdersDatatable/OrdersDatatable";
+import {OrdersDatatable} from "../../Components/OrdersDatatable/OrdersDatatable";
 
 const Home = () => {
     return (

@@ -1,4 +1,5 @@
-import {BrowserRouter, Routes, Route} from "react-router-dom";
+import {BrowserRouter, Routes, Route, Link} from "react-router-dom";
+import {createRoot} from "react-dom/client";
 import Home from "./Pages/Home/Home";
 import {LoginPage} from "./Pages/Login/LoginPage";
 import {OrdersList} from "./Pages/OrdersList/OrdersList"
@@ -10,22 +11,19 @@ import React from "react";
 import {CategoriesList} from "./Pages/CategoriesList/CategoriesList";
 
 function App() {
+
     return (
         <div className="App">
             <BrowserRouter>
                 <Routes>
-                    <Route path="/">
-                        <Route index element={<Home/>}/>
-                        <Route path="login" element={<LoginPage/>}/>
-                        <Route path="orders" element={<OrdersList/>}/>
-                        <Route path="users">
-                            <Route index element={<UsersList/>}/>
-                            <Route path=":userId" element={<SingleUser/>}/>
-                            <Route path="new" element={<NewUser/>}></Route>
-                        </Route>
-                        <Route path="products" element={<ProductsList/>}/>
-                        <Route path="categories" element={<CategoriesList/>}/>
-                    </Route>
+                    <Route path="/home" element={<Home/>}/>
+                    <Route path="/login" element={<LoginPage/>}/>
+                    <Route path="/orders" element={<OrdersList/>}/>
+                    <Route path="/users" element={<UsersList/>}/>
+                    <Route path="/users/userId" element={<SingleUser/>}/>
+                    <Route path="/users/new" element={<NewUser/>}/>
+                    <Route path="/products" element={<ProductsList/>}/>
+                    <Route path="/categories" element={<CategoriesList/>}/>
                 </Routes>
             </BrowserRouter>
         </div>

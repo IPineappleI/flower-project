@@ -13,7 +13,7 @@ const columns = [
     {field: 'shoppingCartId', headerName: "Shopping cart id", width: 150},
 ];
 
-export const UsersDatatable = () => {
+export function UsersDatatable() {
 
     const [users, setUsers] = useState([]);
 

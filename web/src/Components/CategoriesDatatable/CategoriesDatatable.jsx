@@ -8,7 +8,7 @@ const columns = [
     {field: 'name', headerName: 'Name', width: 200},
 ];
 
-export const CategoriesDatatable = () => {
+export function CategoriesDatatable() {
 
     const [categories, setCategories] = useState([]);
 

@@ -1,26 +1,33 @@
 import "./OrdersDatatable.scss"
-import { DataGrid } from '@mui/x-data-grid';
-import React, {useState} from "react";
+import {DataGrid} from '@mui/x-data-grid';
+import React, {useEffect, useState} from "react";
 import Axios from "axios";
 
 const columns = [
-    { field: 'id', headerName: 'Id', width: 100 },
-    { field: 'dateAndTime', headerName: 'Date and time', width: 250 },
-    { field: 'clientId', headerName: 'Client id', width: 100 },
-    { field: 'shoppingCart', headerName: 'Shopping cart', width: 400 },
-    { field: 'price', headerName: 'Order price', width: 150 },
-    { field: 'status', headerName: 'Status', width: 200 },
+    {field: 'id', headerName: 'Id', width: 100},
+    {field: 'dateAndTime', headerName: 'Date and time', width: 250},
+    {field: 'clientId', headerName: 'Client id', width: 100},
+    {field: 'shoppingCart', headerName: 'Shopping cart', width: 400},
+    {field: 'price', headerName: 'Order price', width: 150},
+    {field: 'status', headerName: 'Status', width: 200},
 ];
-
-const [orders, setOrders] = useState([]);
 
 export function OrdersDatatable() {
 
-    Axios.get("https://localhost:7153/Orders")
-        .then(
-            (res) => {
-                setOrders(res?.data);
-            });
+    const [orders, setOrders] = useState([]);
+
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        if (loaded)
+            return;
+        Axios.get("https://localhost:7153/Orders")
+            .then(
+                (res) => {
+                    setOrders(res?.data);
+                });
+        setLoaded(true);
+    })
 
     const actionColumn = [
         {

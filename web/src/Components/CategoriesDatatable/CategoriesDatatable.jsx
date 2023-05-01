@@ -1,6 +1,6 @@
 import "./CategoriesDatatable.scss"
 import {DataGrid} from '@mui/x-data-grid';
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import Axios from "axios";
 
 const columns = [
@@ -8,15 +8,22 @@ const columns = [
     {field: 'name', headerName: 'Name', width: 200},
 ];
 
-const [categories, setCategories] = useState([]);
-
 export function CategoriesDatatable() {
 
-    Axios.get("https://localhost:7153/Categories")
-        .then(
-            (res) => {
-                setCategories(res?.data);
-            });
+    const [categories, setCategories] = useState([]);
+
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        if (loaded)
+            return;
+        Axios.get("https://localhost:7153/Categories")
+            .then(
+                (res) => {
+                    setCategories(res?.data);
+                });
+        setLoaded(true);
+    })
 
     const actionColumn = [
         {

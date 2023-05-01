@@ -1,6 +1,6 @@
 import "./ProductsDatatable.scss"
 import {DataGrid} from '@mui/x-data-grid';
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Axios from "axios";
 
 const columns = [
@@ -13,15 +13,22 @@ const columns = [
     {field: 'image', headerName: "Image", width: 250},
 ];
 
-const [products, setProducts] = useState([]);
-
 export function ProductsDatatable() {
 
-    Axios.get("https://localhost:7153/Items")
-        .then(
-            (res) => {
-                setProducts(res?.data);
-            });
+    const [products, setProducts] = useState([]);
+
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        if (loaded)
+            return;
+        Axios.get("https://localhost:7153/Items")
+            .then(
+                (res) => {
+                    setProducts(res?.data);
+                });
+        setLoaded(true);
+    })
 
     const actionColumn = [
         {

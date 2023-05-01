@@ -1,6 +1,6 @@
 import "./UsersDatatable.scss"
 import {DataGrid} from '@mui/x-data-grid';
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Axios from "axios";
 
 const columns = [
@@ -13,15 +13,22 @@ const columns = [
     {field: 'shoppingCartId', headerName: "Shopping cart id", width: 150},
 ];
 
-const [users, setUsers] = useState([]);
-
 export function UsersDatatable() {
 
-    Axios.get("https://localhost:7153/Users")
-        .then(
-            (res) => {
-                setUsers(res?.data);
-            });
+    const [users, setUsers] = useState([]);
+
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        if (loaded)
+            return;
+        Axios.get("https://localhost:7153/Users")
+            .then(
+                (res) => {
+                    setUsers(res?.data);
+                });
+        setLoaded(true);
+    })
 
     const actionColumn = [
         {

@@ -15,19 +15,17 @@ public class UsersController : ControllerBase
     private static async Task Create(User user)
     {
         const string commandText =
-            "INSERT INTO users (id, first_name, last_name, email, phone_number, password, role, shopping_cart_id) " +
-            "VALUES (@id, @firstName, @lastName, @email, @phoneNumber, @password, @role, @shoppingCartId)";
+            "INSERT INTO users (first_name, last_name, email, phone_number, password, role) " +
+            "VALUES (@firstName, @lastName, @email, @phoneNumber, @password, @role)";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
-
-        cmd.Parameters.AddWithValue("id", user.Id!);
+        
         cmd.Parameters.AddWithValue("firstName", user.FirstName);
         cmd.Parameters.AddWithValue("lastName", user.LastName!);
         cmd.Parameters.AddWithValue("email", user.Email);
         cmd.Parameters.AddWithValue("phoneNumber", user.PhoneNumber);
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
-        cmd.Parameters.AddWithValue("shoppingCartId", user.ShoppingCartId!);
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -43,6 +41,10 @@ public class UsersController : ControllerBase
         try
         {
             Create(user).Wait();
+            var newUser = ReadByEmail(user.Email).Result;
+            OrdersController.Create(new Order(newUser!.Id!.Value, new Dictionary<int, int>(), 0, "Shopping Cart",
+                newUser.ShoppingCartId)).Wait();
+            // EmailSender.SendEmail(user.Email);
         }
         catch (AggregateException e)
         {

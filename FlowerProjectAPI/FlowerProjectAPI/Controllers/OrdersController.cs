@@ -13,19 +13,37 @@ namespace FlowerProjectAPI.Controllers;
 [Route("[controller]")]
 public class OrdersController : ControllerBase
 {
-    private static async Task Create(Order order)
+    public static async Task Create(Order order)
     {
-        const string commandText = "INSERT INTO orders (client_id, shopping_cart, price, status) " +
-                                   "VALUES (@clientEmail, @shoppingCart, @price, @status)";
+        if (order.Id != null)
+        {
+            const string commandText = "INSERT INTO orders (id, client_id, shopping_cart, price, status) " +
+                                       "VALUES (@id, @clientEmail, @shoppingCart, @price, @status)";
 
-        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+            await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
-        cmd.Parameters.AddWithValue("clientEmail", order.ClientId);
-        cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(order.ShoppingCart));
-        cmd.Parameters.AddWithValue("price", order.Price);
-        cmd.Parameters.AddWithValue("status", order.Status);
+            cmd.Parameters.AddWithValue("id", order.Id);
+            cmd.Parameters.AddWithValue("clientEmail", order.ClientId);
+            cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(order.ShoppingCart));
+            cmd.Parameters.AddWithValue("price", order.Price);
+            cmd.Parameters.AddWithValue("status", order.Status);
 
-        await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+        else
+        {
+            const string commandText = "INSERT INTO orders (client_id, shopping_cart, price, status) " +
+                                       "VALUES (@clientEmail, @shoppingCart, @price, @status)";
+
+            await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+
+            cmd.Parameters.AddWithValue("clientEmail", order.ClientId);
+            cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(order.ShoppingCart));
+            cmd.Parameters.AddWithValue("price", order.Price);
+            cmd.Parameters.AddWithValue("status", order.Status);
+
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 
     [HttpPost]

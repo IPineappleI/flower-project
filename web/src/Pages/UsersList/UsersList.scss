@@ -11,9 +11,24 @@
 
       .listTitle {
         font-weight: 500;
-        color: gray;
         margin-bottom: 15px;
         margin-top: 15px;
+        font-size: 15px;
+
+        h1 {
+          color: rgb(136, 93, 218);
+        }
+      }
+
+      .mainButton {
+        width: 150px;
+        padding: 10px;
+        border: none;
+        background-color: #885dda;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
       }
     }
   }

@@ -1,8 +1,51 @@
 import "./NewUser.scss"
 import SideBar from "../../Components/SideBar/SideBar";
 import NavBar from "../../Components/NavBar/NavBar";
+import {Link} from 'react-router-dom';
+import {useState} from "react";
+import axios from "axios";
+import Modal from 'react-modal';
+
 
 const NewUser = () => {
+    const [id, setId] = useState('');
+    const [role, setRole] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [shoppingCartId, setshoppingCartId] = useState('');
+
+    const [showSuccessModal, setSuccessModal] = useState(false);
+    const [showFailModal, setFailModal] = useState(false);
+
+    const create = () => {
+
+        let data = {
+            "id": id,
+            "firstName": firstName,
+            "lastName": lastName,
+            "email": email,
+            "phoneNumber": phone,
+            "password": password,
+            "role": role,
+            "shoppingCartId": shoppingCartId
+        };
+        const response = axios({
+            method: 'post',
+            url: "https://localhost:7153/Users",
+            headers: {},
+            data: data
+        }).then(() => {
+            console.log(response);
+            setSuccessModal(true);
+        }).catch((error) => {
+            console.log(error);
+            setFailModal(true);
+        });
+    }
+
     return (
         <div className="new">
             <SideBar/>
@@ -16,19 +59,23 @@ const NewUser = () => {
                         <form>
                             <div className="formInput">
                                 <label>ID</label>
-                                <input type="number" placeholder="1"/>
+                                <input value={id} onChange={(e) => setId(e.target.value)} type="number"
+                                       placeholder="1"/>
                             </div>
                             <div className="formInput">
                                 <label>Role</label>
-                                <input type="number" placeholder="1"/>
+                                <input value={role} onChange={(e) => setRole(e.target.value)} type="text"
+                                       placeholder="client | manager | admin"/>
                             </div>
                             <div className="formInput">
                                 <label>First name</label>
-                                <input type="text" placeholder="Ivan"/>
+                                <input value={firstName} onChange={(e) => setFirstName(e.target.value)} type="text"
+                                       placeholder="Ivan"/>
                             </div>
                             <div className="formInput">
                                 <label>Last name</label>
-                                <input type="text" placeholder="Ivanov"/>
+                                <input value={lastName} onChange={(e) => setLastName(e.target.value)} type="text"
+                                       placeholder="Ivanov"/>
                             </div>
                         </form>
                     </div>
@@ -36,20 +83,47 @@ const NewUser = () => {
                         <form>
                             <div className="formInput">
                                 <label>Phone number</label>
-                                <input type="number" placeholder="88888888888"/>
+                                <input value={phone} onChange={(e) => setPhone(e.target.value)} type="text"
+                                       placeholder="88888888888"/>
                             </div>
                             <div className="formInput">
                                 <label>Email</label>
-                                <input type="email" placeholder="client@mail.com"/>
+                                <input value={email} onChange={(e) => setEmail(e.target.value)} type="email"
+                                       placeholder="client@mail.com"/>
                             </div>
                             <div className="formInput">
                                 <label>Password</label>
-                                <input type="text"/>
+                                <input value={password} onChange={(e) => setPassword(e.target.value)} type="password"
+                                       placeholder="*******"/>
+                            </div>
+                            <div className="formInput">
+                                <label>Shopping cart id</label>
+                                <input value={shoppingCartId} onChange={(e) => setshoppingCartId(e.target.value)}
+                                       type="number"/>
                             </div>
                         </form>
                     </div>
                 </div>
-                <button>Create a new user</button>
+                <Link to="/users">
+                    <button>Cancel</button>
+                </Link>
+                <button onClick={create}>Create a new user</button>
+                <div className="modal">
+                    <Modal ariaHideApp={false} isOpen={showSuccessModal} onRequestClose={() => setSuccessModal(false)}>
+                        <div className="modal-content">
+                            User created successfully
+                            <button onClick={() => setSuccessModal(false)}> OK </button>
+                        </div>
+                    </Modal>
+                    <Modal ariaHideApp={false} isOpen={showFailModal} onRequestClose={() => setFailModal(false)}>
+                        <div className="modal-content">
+                            Can't create user, please check if info is correct.
+                            <button onClick={() => setFailModal(false)}>
+                                Close
+                            </button>
+                        </div>
+                    </Modal>
+                </div>
             </div>
         </div>
     )

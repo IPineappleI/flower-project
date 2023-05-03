@@ -8,9 +8,15 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
+import CategoryIcon from '@mui/icons-material/Category';
 import {Link} from "react-router-dom"
 
 const SideBar = () => {
+
+    const logout = () => {
+        localStorage.clear();
+    }
+
     return (
         <div className="sidebar">
             <div className="top">
@@ -49,7 +55,7 @@ const SideBar = () => {
                     </Link>
                     <Link to="/categories" style={{ textDecoration: "none" }}>
                         <li>
-                            <StorefrontOutlinedIcon className="icon"/>
+                            <CategoryIcon className="icon"/>
                             <span>Categories</span>
                         </li>
                     </Link>
@@ -72,7 +78,7 @@ const SideBar = () => {
                         <AccountCircleOutlinedIcon className="icon"/>
                         <span>Profile</span>
                     </li>
-                    <Link to="/login" style={{ textDecoration: "none" }}>
+                    <Link to="/login" style={{ textDecoration: "none" }} onClick={logout}>
                         <li>
                             <ExitToAppOutlinedIcon className="icon"/>
                             <span>Logout</span>

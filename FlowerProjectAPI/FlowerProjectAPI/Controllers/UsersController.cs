@@ -12,6 +12,21 @@ namespace FlowerProjectAPI.Controllers;
 [Route("[controller]")]
 public class UsersController : ControllerBase
 {
+    [HttpGet("ConfirmEmail")]
+    public IActionResult ConfirmEmail(string email, string token)
+    {
+        var emailToken = TokensController.ReadByEmail(email).Result;
+
+        if (emailToken == null)
+        {
+            return BadRequest($"confirmation token for email {email} not found");
+        }
+
+        return emailToken.Token != token
+            ? BadRequest($"incorrect confirmation token for email {email}")
+            : PatchEmailConfirmed(email, true);
+    }
+
     private static async Task Create(User user)
     {
         const string commandText =
@@ -19,7 +34,7 @@ public class UsersController : ControllerBase
             "VALUES (@firstName, @lastName, @email, @phoneNumber, @password, @role)";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
-        
+
         cmd.Parameters.AddWithValue("firstName", user.FirstName);
         cmd.Parameters.AddWithValue("lastName", user.LastName!);
         cmd.Parameters.AddWithValue("email", user.Email);
@@ -41,10 +56,20 @@ public class UsersController : ControllerBase
         try
         {
             Create(user).Wait();
+
             var newUser = ReadByEmail(user.Email).Result;
-            OrdersController.Create(new Order(newUser!.Id!.Value, new Dictionary<int, int>(), 0, "Shopping Cart",
-                newUser.ShoppingCartId)).Wait();
-            // EmailSender.SendEmail(user.Email);
+            if (newUser!.Role == "client")
+            {
+                OrdersController.Create(new Order(newUser.Id, new Dictionary<int, int>(),
+                    0, "Shopping Cart", newUser.ShoppingCartId)).Wait();
+            }
+
+            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+            TokensController.Create(new EmailToken(newUser.Email, token)).Wait();
+
+            var link = Url.Action(nameof(ConfirmEmail), "Users",
+                new { email = newUser.Email, token }, Request.Scheme);
+            EmailSender.SendEmailConfirmationLink(newUser.Email, link);
         }
         catch (AggregateException e)
         {
@@ -64,14 +89,16 @@ public class UsersController : ControllerBase
         var password = reader["password"] as string;
         var role = reader["role"] as string;
         var shoppingCartId = reader["shopping_cart_id"] as int?;
+        var emailConfirmed = reader["email_confirmed"] as bool?;
 
-        return new User(email!, phoneNumber!, password!, role!, firstName!, lastName, id, shoppingCartId);
+        return new User(email!, phoneNumber!, password!, role!, firstName!, lastName,
+            emailConfirmed!.Value, id!.Value, shoppingCartId);
     }
-    
+
     private static async Task<List<User>?> Read()
     {
         var users = new List<User>();
-        
+
         const string commandText = "SELECT * FROM users";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
@@ -84,7 +111,7 @@ public class UsersController : ControllerBase
 
         return users;
     }
-    
+
     [HttpGet]
     public IActionResult Get()
     {
@@ -154,7 +181,7 @@ public class UsersController : ControllerBase
             return BadRequest("incorrect password");
         }
 
-        return Ok(result);
+        return result.EmailConfirmed ? Ok(result) : BadRequest($"email {result.Email} is not confirmed");
     }
 
     private static async Task<User?> ReadByPhoneNumber(string phoneNumber)
@@ -192,20 +219,21 @@ public class UsersController : ControllerBase
             return BadRequest("incorrect password");
         }
 
-        return Ok(result);
+        return result.EmailConfirmed ? Ok(result) : BadRequest($"email {result.Email} is not confirmed");
     }
 
     private static async Task Update(int id, User user)
     {
         const string commandText = @"UPDATE users
                 SET id = @id, first_name = @firstName, last_name = @lastName, email = @email, 
-                    phone_number = @phoneNumber, password = @password, role = @role, shopping_cart_id = @shoppingCartId
-                WHERE email = @oldId";
+                    phone_number = @phoneNumber, password = @password, role = @role, 
+                    shopping_cart_id = @shoppingCartId, email_confirmed = @emailConfirmed
+                WHERE id = @oldId";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
         cmd.Parameters.AddWithValue("oldId", id);
-        cmd.Parameters.AddWithValue("id", user.Id!);
+        cmd.Parameters.AddWithValue("id", user.Id);
         cmd.Parameters.AddWithValue("firstName", user.FirstName);
         cmd.Parameters.AddWithValue("lastName", user.LastName!);
         cmd.Parameters.AddWithValue("email", user.Email);
@@ -213,6 +241,7 @@ public class UsersController : ControllerBase
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
         cmd.Parameters.AddWithValue("shoppingCartId", user.ShoppingCartId!);
+        cmd.Parameters.AddWithValue("emailConfirmed", user.EmailConfirmed);
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -379,6 +408,28 @@ public class UsersController : ControllerBase
         }
 
         return Ok("client shopping cart updated successfully");
+    }
+
+    [HttpPatch("emailConfirmed")]
+    public IActionResult PatchEmailConfirmed(string email, bool emailConfirmed)
+    {
+        var result = ReadByEmail(email).Result;
+        if (result == null)
+        {
+            return BadRequest("user not found");
+        }
+
+        result.EmailConfirmed = emailConfirmed;
+        try
+        {
+            Update(result.Id, result).Wait();
+        }
+        catch (AggregateException e)
+        {
+            return BadRequest(e.Message);
+        }
+
+        return Ok("user email confirmation status updated successfully");
     }
 
     private static async Task DeleteUser(int id)

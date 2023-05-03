@@ -5,7 +5,7 @@ namespace FlowerProjectAPI.Models;
 
 public class User
 {
-    public int? Id { get; set; }
+    public int Id { get; set; }
 
     [Required] public string FirstName { get; set; }
 
@@ -24,9 +24,11 @@ public class User
     public string Role { get; set; }
 
     public int? ShoppingCartId { get; set; }
+    
+    public bool EmailConfirmed { get; set; }
 
-    public User(string email, string phoneNumber, string password, string role, string firstName,
-        string? lastName = null, int? id = null, int? shoppingCartId = null)
+    public User(string email, string phoneNumber, string password, string role, string firstName, string? lastName, 
+        bool emailConfirmed = false, int id = 0, int? shoppingCartId = null)
     {
         Id = id;
         FirstName = firstName;
@@ -35,6 +37,7 @@ public class User
         PhoneNumber = phoneNumber;
         Password = password;
         Role = role;
+        EmailConfirmed = emailConfirmed;
 
         if (role != "client")
         {

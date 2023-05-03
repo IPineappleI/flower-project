@@ -2,22 +2,21 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {Text, SafeAreaView, View, TouchableOpacity, Alert} from 'react-native';
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {Formik} from "formik";
-import axios from "axios";
 import FormField from "../components/FormField";
 import {registrationValidationSchema} from "../validation";
 import {globalStyles} from "../styles/globalStyles";
+import axios from "axios";
 
 export default function Registration({navigation}) {
     function onSubmitHandler(values) {
+        console.log(values)
         let user = {
-            "id": null,
             "firstName": values[0],
             "lastName": values[1],
             "email": values[2],
             "phoneNumber": values[3],
             "password": values[4],
-            "role": "client",
-            "shoppingCartId": null
+            "role": "client"
         }
 
         let query = Object.keys(user)
@@ -29,11 +28,11 @@ export default function Registration({navigation}) {
         try {
             const response = axios.post(url, user);
 
-            // response
-            //     .then((res) => {
-            //         localStorage.setItem("user", JSON.stringify(res?.data))
-            //     })
-            //     .catch((error) => console.log(error.response))
+            response
+                .then((res) => {
+                    localStorage.setItem("user", JSON.stringify(res?.data))
+                })
+                .catch((error) => console.log(error.response))
         } catch (error) {
             console.log(error)
         }
@@ -143,9 +142,7 @@ export default function Registration({navigation}) {
                                     handleBlur={handleBlur}
                                 />
 
-                                <TouchableOpacity
-                                    onPress={handleSubmit}
-                                >
+                                <TouchableOpacity onPress={handleSubmit}>
                                     <View
                                         style={[
                                             globalStyles.signUpButton,

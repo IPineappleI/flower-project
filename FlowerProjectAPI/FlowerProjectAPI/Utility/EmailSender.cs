@@ -17,15 +17,15 @@ public abstract class EmailSender
         Client.Dispose();
     }
 
-    public static void SendEmail(string to)
+    public static void SendEmailConfirmationLink(string to, string? link)
     {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("Flower Project", From));
         message.To.Add(MailboxAddress.Parse(to));
-        message.Subject = "Email Verification";
+        message.Subject = "Email Confirmation";
         message.Body = new TextPart("plain")
         {
-            Text = "Test"
+            Text = "Use this link to confirm your email address:\n" + link
         };
 
         try

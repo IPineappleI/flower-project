@@ -8,14 +8,12 @@ import Modal from 'react-modal';
 
 
 const NewUser = () => {
-    const [id, setId] = useState('');
     const [role, setRole] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [shoppingCartId, setshoppingCartId] = useState('');
 
     const [showSuccessModal, setSuccessModal] = useState(false);
     const [showFailModal, setFailModal] = useState(false);
@@ -23,14 +21,12 @@ const NewUser = () => {
     const create = () => {
 
         let data = {
-            "id": id,
             "firstName": firstName,
             "lastName": lastName,
             "email": email,
             "phoneNumber": phone,
             "password": password,
             "role": role,
-            "shoppingCartId": shoppingCartId
         };
         const response = axios({
             method: 'post',
@@ -52,21 +48,11 @@ const NewUser = () => {
             <div className="newContainer">
                 <NavBar/>
                 <div className="top">
-                    <h1>Add New User</h1>
+                    <h1>New User</h1>
                 </div>
                 <div className="bottom">
                     <div className="left">
                         <form>
-                            <div className="formInput">
-                                <label>ID</label>
-                                <input value={id} onChange={(e) => setId(e.target.value)} type="number"
-                                       placeholder="1"/>
-                            </div>
-                            <div className="formInput">
-                                <label>Role</label>
-                                <input value={role} onChange={(e) => setRole(e.target.value)} type="text"
-                                       placeholder="client | manager | admin"/>
-                            </div>
                             <div className="formInput">
                                 <label>First name</label>
                                 <input value={firstName} onChange={(e) => setFirstName(e.target.value)} type="text"
@@ -77,29 +63,29 @@ const NewUser = () => {
                                 <input value={lastName} onChange={(e) => setLastName(e.target.value)} type="text"
                                        placeholder="Ivanov"/>
                             </div>
-                        </form>
-                    </div>
-                    <div className="right">
-                        <form>
                             <div className="formInput">
                                 <label>Phone number</label>
                                 <input value={phone} onChange={(e) => setPhone(e.target.value)} type="text"
                                        placeholder="88888888888"/>
                             </div>
-                            <div className="formInput">
-                                <label>Email</label>
-                                <input value={email} onChange={(e) => setEmail(e.target.value)} type="email"
-                                       placeholder="client@mail.com"/>
-                            </div>
+                        </form>
+                    </div>
+                    <div className="right">
+                        <form>
                             <div className="formInput">
                                 <label>Password</label>
                                 <input value={password} onChange={(e) => setPassword(e.target.value)} type="password"
                                        placeholder="*******"/>
                             </div>
                             <div className="formInput">
-                                <label>Shopping cart id</label>
-                                <input value={shoppingCartId} onChange={(e) => setshoppingCartId(e.target.value)}
-                                       type="number"/>
+                                <label>Role</label>
+                                <input value={role} onChange={(e) => setRole(e.target.value)} type="text"
+                                       placeholder="client | manager | admin"/>
+                            </div>
+                            <div className="formInput">
+                                <label>Email</label>
+                                <input value={email} onChange={(e) => setEmail(e.target.value)} type="email"
+                                       placeholder="client@mail.com"/>
                             </div>
                         </form>
                     </div>
@@ -108,22 +94,22 @@ const NewUser = () => {
                     <button>Cancel</button>
                 </Link>
                 <button onClick={create}>Create a new user</button>
-                <div className="modal">
-                    <Modal ariaHideApp={false} isOpen={showSuccessModal} onRequestClose={() => setSuccessModal(false)}>
-                        <div className="modal-content">
-                            User created successfully
-                            <button onClick={() => setSuccessModal(false)}> OK </button>
-                        </div>
-                    </Modal>
-                    <Modal ariaHideApp={false} isOpen={showFailModal} onRequestClose={() => setFailModal(false)}>
-                        <div className="modal-content">
-                            Can't create user, please check if info is correct.
-                            <button onClick={() => setFailModal(false)}>
-                                Close
-                            </button>
-                        </div>
-                    </Modal>
-                </div>
+                <Modal ariaHideApp={false} isOpen={showSuccessModal} onRequestClose={() => setSuccessModal(false)}
+                       portalClassName="modal">
+                    <div className="modal-content">
+                        User created successfully
+                        <button onClick={() => setSuccessModal(false)}> OK </button>
+                    </div>
+                </Modal>
+                <Modal ariaHideApp={false} isOpen={showFailModal} onRequestClose={() => setFailModal(false)}
+                       portalClassName="modal">
+                    <div className="modal-content">
+                        Can't create user, please check if info is correct.
+                        <button onClick={() => setFailModal(false)}>
+                            Close
+                        </button>
+                    </div>
+                </Modal>
             </div>
         </div>
     )

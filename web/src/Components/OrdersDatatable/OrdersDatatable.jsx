@@ -29,16 +29,21 @@ export function OrdersDatatable() {
         setLoaded(true);
     })
 
+    const handleDelete = (id) => {
+        let url = "https://localhost:7153/Orders?id=" + id;
+        Axios.delete(url).then(() => setLoaded(false));
+    }
+
     const actionColumn = [
         {
             field: 'action',
             headerName: 'Action',
             width: 200,
-            renderCell: () => {
+            renderCell: (params) => {
                 return (
                     <div className="cellAction">
-                        <div className="viewButton">View</div>
-                        <div className="deleteButton">Delete</div>
+                        <div className="editButton">Edit</div>
+                        <div className="deleteButton" onClick={() => handleDelete(params.row.id)}>Delete</div>
                     </div>
                 )
             }

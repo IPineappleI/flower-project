@@ -7,6 +7,14 @@
   align-items: center;
   gap: 15px;
 
+  .editButton {
+    padding: 2px 5px;
+    border-radius: 5px;
+    color: orange;
+    border: 1px solid rgb(224, 133, 14);
+    cursor: pointer;
+  }
+
   .viewButton {
     padding: 2px 5px;
     border-radius: 5px;

@@ -1,13 +1,8 @@
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
-import {globalStyle} from "./styles/globalStyles";
-import Header from "./components/Header";
+import {globalStyles} from "./styles/globalStyles";
 import React, {useCallback, useEffect, useState} from 'react';
-import {
-    Text,
-    SafeAreaView,
-    View
-} from 'react-native';
+import {SafeAreaView} from 'react-native';
 import Navigate from "./Navigate";
 
 SplashScreen.preventAutoHideAsync();
@@ -47,7 +42,7 @@ export default function App() {
     }
 
     return (
-        <SafeAreaView onLayout={onLayoutRootView}>
+        <SafeAreaView onLayout={onLayoutRootView} style={globalStyles.mainSafeArea}>
             <Navigate/>
         </SafeAreaView>
     );

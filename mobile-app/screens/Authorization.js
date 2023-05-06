@@ -6,14 +6,26 @@ import {Formik} from "formik";
 import axios from "axios";
 import FormField from "../components/FormField";
 import {authorizationValidationSchema} from "../validation";
+import Catalog from "./Catalog";
 
 export default function Authorization({navigation}) {
+    const getUser = () => {
+        return fetch('https://reactnative.dev/movies.json')
+            .then(response => response.json())
+            .then(json => {
+                return json.movies;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    };
+
     function onSignInHandler(values) {
         console.log(values);
 
         let user = {
-            "email": values[0],
-            "password": values[1]
+            "email": values.emailOrPhoneNumber,
+            "password": values.password
         }
 
         let query = Object.keys(user)
@@ -22,28 +34,32 @@ export default function Authorization({navigation}) {
         if (query === null) {
             console.log("Null query");
         } else {
-            console.log(query);
+            console.log("query = " + query);
         }
 
-        let url = "https://10.0.2.2:7153/Users/authorizeByEmail?" + query;
+        let url = "http://localhost:5022/Users/authorizeByEmail?" + query;
 
         try {
+            console.log("url = " + url);
+
             const response = axios.get(url);
 
             response
                 .then((res) => {
-                    console.log(JSON.stringify(res?.data));
+                    console.log(res.data);
                 })
-                .catch((error) => console.log(error.response))
+                .catch((error) => console.log("error - " + error))
+
+            //navigation.navigate('Home', {screen: 'Catalog'});
 
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
 
-        Alert.alert(
-            "Signed In Successfully!",
-            "Form data: " + JSON.stringify(values)
-        );
+        // Alert.alert(
+        //     "Signed In Successfully!",
+        //     "Form data: " + JSON.stringify(values)
+        // );
     }
 
     function onSignUpHandler() {

@@ -11,7 +11,9 @@ export const CategoriesList = () => {
             <div className="listContainer">
                 <NavBar/>
                 <div className="datatable">
-                    <div className="listTitle">Categories</div>
+                    <div className="listTitle">
+                        <h1>Categories</h1>
+                    </div>
                     <CategoriesDatatable/>
                 </div>
             </div>

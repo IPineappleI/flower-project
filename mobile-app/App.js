@@ -1,9 +1,14 @@
+import React, {useCallback, useEffect, useState} from 'react';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
+import {NavigationContainer} from "@react-navigation/native";
+import {Alert, SafeAreaView} from 'react-native';
+
+import Home from "./Home";
 import {globalStyles} from "./styles/globalStyles";
-import React, {useCallback, useEffect, useState} from 'react';
-import {SafeAreaView} from 'react-native';
-import Navigate from "./Navigate";
+import SignIn from "./screens/SignIn";
+import Authorization from "./Authorization";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,7 +48,9 @@ export default function App() {
 
     return (
         <SafeAreaView onLayout={onLayoutRootView} style={globalStyles.mainSafeArea}>
-            <Navigate/>
+            <NavigationContainer>
+                <Authorization/>
+            </NavigationContainer>
         </SafeAreaView>
     );
 }

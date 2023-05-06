@@ -27,7 +27,8 @@ public class UsersController : ControllerBase
         cmd.Parameters.AddWithValue("phoneNumber", user.PhoneNumber);
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
-        cmd.Parameters.AddWithValue("shoppingCart", user.ShoppingCart);
+        cmd.Parameters.AddWithValue("shoppingCart", 
+            user.ShoppingCart == null ? null : JsonConvert.SerializeObject(user.ShoppingCart));
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -210,7 +211,8 @@ public class UsersController : ControllerBase
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
         cmd.Parameters.AddWithValue("emailConfirmed", user.EmailConfirmed);
-        cmd.Parameters.AddWithValue("shoppingCart", user.ShoppingCart);
+        cmd.Parameters.AddWithValue("shoppingCart", 
+            user.ShoppingCart == null ? null : JsonConvert.SerializeObject(user.ShoppingCart));
 
         await cmd.ExecuteNonQueryAsync();
     }

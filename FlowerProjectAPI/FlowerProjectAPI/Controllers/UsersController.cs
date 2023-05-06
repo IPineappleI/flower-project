@@ -263,7 +263,7 @@ public class UsersController : ControllerBase
             return NotFound("user not found");
         }
 
-        var emailChecker = new EmailAddressAttribute();
+        var emailChecker = new RegularExpressionAttribute(@"^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$");
         if (!emailChecker.IsValid(newEmail))
         {
             return BadRequest($"{newEmail} is not a valid email address");
@@ -305,7 +305,8 @@ public class UsersController : ControllerBase
             return NotFound("user not found");
         }
 
-        var phoneChecker = new PhoneAttribute();
+        var phoneChecker = new RegularExpressionAttribute(
+            @"^\(?\+?[0-9]{1,3}\)? ?-?[0-9]{1,3} ?-?[0-9]{3,5} ?-?[0-9]{4}( ?-?[0-9]{3})?$");
         if (!phoneChecker.IsValid(newPhoneNumber))
         {
             return BadRequest($"{newPhoneNumber} is not a valid phone number");

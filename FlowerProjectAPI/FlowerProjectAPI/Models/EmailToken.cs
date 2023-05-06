@@ -5,7 +5,7 @@ namespace FlowerProjectAPI.Models;
 public class EmailToken
 {
     [Required]
-    [EmailAddress]
+    [RegularExpression(@"^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$")]
     public string Email { get; set; }
     
     [Required]

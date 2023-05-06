@@ -11,9 +11,13 @@ public class User
 
     public string? LastName { get; set; }
 
-    [Required] [EmailAddress] public string Email { get; set; }
+    [Required]
+    [RegularExpression(@"^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$")]
+    public string Email { get; set; }
 
-    [Required] [Phone] public string PhoneNumber { get; set; }
+    [Required]
+    [RegularExpression(@"^\(?\+?[0-9]{1,3}\)? ?-?[0-9]{1,3} ?-?[0-9]{3,5} ?-?[0-9]{4}( ?-?[0-9]{3})?$")]
+    public string PhoneNumber { get; set; }
 
     [Required]
     [CustomValidation(typeof(Validator), "ValidatePassword")]

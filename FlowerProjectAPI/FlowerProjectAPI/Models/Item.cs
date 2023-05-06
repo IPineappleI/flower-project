@@ -4,7 +4,7 @@ namespace FlowerProjectAPI.Models;
 
 public class Item
 {
-    public int? Id { get; set; }
+    [Required] public int Id { get; set; }
 
     [Required] public string Name { get; set; }
 
@@ -18,8 +18,8 @@ public class Item
 
     public string? Image { get; set; }
 
-    public Item(string name, int categoryId, decimal price, int count,
-        int? id = null, string? description = null, string? image = null)
+    public Item(int id, string name, int categoryId, decimal price, int count,
+        string? description = null, string? image = null)
     {
         Id = id;
         Name = name;

@@ -40,7 +40,7 @@ public class TokensController : ControllerBase
             return BadRequest(e.Message);
         }
 
-        return Ok("email token added successfully");
+        return Created("Tokens", ReadByEmail(emailToken.Email).Result);
     }
 
     private static EmailToken ReadEmailToken(IDataRecord reader)
@@ -73,7 +73,7 @@ public class TokensController : ControllerBase
     {
         var result = Read().Result;
 
-        return result == null ? BadRequest("tokens not found") : Ok(result);
+        return result == null ? NotFound("tokens not found") : Ok(result);
     }
 
     public static async Task<EmailToken?> ReadByEmail(string email)
@@ -99,10 +99,10 @@ public class TokensController : ControllerBase
     {
         var result = ReadByEmail(email).Result;
 
-        return result == null ? BadRequest("email token not found") : Ok(result);
+        return result == null ? NotFound("email token not found") : Ok(result);
     }
 
-    private static async Task EmailToken(string email)
+    public static async Task DeleteToken(string email)
     {
         const string commandText = "DELETE FROM tokens WHERE email = (@email)";
         
@@ -116,14 +116,14 @@ public class TokensController : ControllerBase
     [HttpDelete]
     public IActionResult Delete(string email)
     {
-        if (Get(email) is BadRequestObjectResult)
+        if (Get(email) is NotFoundObjectResult)
         {
-            return BadRequest("email token not found");
+            return NoContent();
         }
 
         try
         {
-            EmailToken(email).Wait();
+            DeleteToken(email).Wait();
         }
         catch (AggregateException e)
         {

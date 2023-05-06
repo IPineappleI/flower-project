@@ -14,7 +14,7 @@
       display: flex;
 
       h1 {
-        color: #949494;
+        color: #885dda;
         font-size: 25px;
       }
 
@@ -49,6 +49,7 @@
       }
     }
     button {
+      margin: 10px;
       width: 150px;
       padding: 10px;
       border: none;
@@ -56,7 +57,22 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 10px;
+      //margin-top: 10px;
+    }
+
+    .modal {
+      height: 50vh;
+      width: 50vh;
+      background-color: rgb(0, 0, 0, 0.4);
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: scale(0);
+      padding: 20px;
+      border-radius: 12px;
     }
   }
 }

@@ -17,7 +17,7 @@ public class ItemsController : ControllerBase
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
-        cmd.Parameters.AddWithValue("id", item.Id!);
+        cmd.Parameters.AddWithValue("id", item.Id);
         cmd.Parameters.AddWithValue("name", item.Name);
         cmd.Parameters.AddWithValue("categoryId", item.CategoryId);
         cmd.Parameters.AddWithValue("price", item.Price);
@@ -45,7 +45,7 @@ public class ItemsController : ControllerBase
             return BadRequest(e.Message);
         }
 
-        return Ok("item added successfully");
+        return Created("Items", ReadById(item.Id).Result);
     }
 
     private static Item ReadItem(IDataRecord reader)
@@ -58,7 +58,7 @@ public class ItemsController : ControllerBase
         var description = reader["description"] as string;
         var image = reader["image"] as string;
 
-        return new Item(name!, categoryId, price, count, id, description, image);
+        return new Item(id!.Value, name!, categoryId, price, count, description, image);
     }
     
     private static async Task<List<Item>?> Read()
@@ -83,7 +83,7 @@ public class ItemsController : ControllerBase
     {
         var result = Read().Result;
 
-        return result == null ? BadRequest("items not found") : Ok(result);
+        return result == null ? NotFound("items not found") : Ok(result);
     }
 
     public static async Task<Item?> ReadById(int id)
@@ -109,7 +109,7 @@ public class ItemsController : ControllerBase
     {
         var result = ReadById(id).Result;
 
-        return result == null ? BadRequest("item not found") : Ok(result);
+        return result == null ? NotFound("item not found") : Ok(result);
     }
 
     private static async Task Update(int id, Item item)
@@ -122,7 +122,7 @@ public class ItemsController : ControllerBase
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
         cmd.Parameters.AddWithValue("oldId", id);
-        cmd.Parameters.AddWithValue("id", item.Id!);
+        cmd.Parameters.AddWithValue("id", item.Id);
         cmd.Parameters.AddWithValue("name", item.Name);
         cmd.Parameters.AddWithValue("categoryId", item.CategoryId);
         cmd.Parameters.AddWithValue("price", item.Price);
@@ -136,9 +136,9 @@ public class ItemsController : ControllerBase
     [HttpPut]
     public IActionResult Put(int id, Item item)
     {
-        if (Get(id) is BadRequestObjectResult)
+        if (Get(id) is NotFoundObjectResult)
         {
-            return BadRequest("item not found");
+            return NotFound("item not found");
         }
 
         if (!ModelState.IsValid)
@@ -164,7 +164,7 @@ public class ItemsController : ControllerBase
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("item not found");
+            return NotFound("item not found");
         }
 
         result.Name = newName;
@@ -186,7 +186,7 @@ public class ItemsController : ControllerBase
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("item not found");
+            return NotFound("item not found");
         }
 
         result.Price = newPrice;
@@ -208,7 +208,7 @@ public class ItemsController : ControllerBase
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("item not found");
+            return NotFound("item not found");
         }
 
         result.Count = newCount;
@@ -238,9 +238,9 @@ public class ItemsController : ControllerBase
     [HttpDelete]
     public IActionResult Delete(int id)
     {
-        if (Get(id) is BadRequestObjectResult)
+        if (Get(id) is NotFoundObjectResult)
         {
-            return BadRequest("item not found");
+            return NoContent();
         }
 
         try

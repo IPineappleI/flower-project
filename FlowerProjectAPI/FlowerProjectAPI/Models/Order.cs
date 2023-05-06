@@ -4,7 +4,7 @@ namespace FlowerProjectAPI.Models;
 
 public class Order
 {
-    public int? Id { get; }
+    [Required] public int Id { get; set; }
 
     public DateTime? DateAndTime { get; }
 
@@ -12,12 +12,12 @@ public class Order
 
     [Required] public Dictionary<int, int> ShoppingCart { get; set; }
 
-    [Required] public decimal Price { get; set; }
+    public decimal Price { get; set; }
 
-    [Required] public string Status { get; set; }
+    public string Status { get; set; }
 
-    public Order(int clientId, Dictionary<int, int> shoppingCart, decimal price, string status,
-        int? id = null, DateTime? dateAndTime = null)
+    public Order(int id, int clientId, Dictionary<int, int> shoppingCart, decimal price = 0, 
+        string status = "New Order", DateTime? dateAndTime = null)
     {
         Id = id;
         DateAndTime = dateAndTime;

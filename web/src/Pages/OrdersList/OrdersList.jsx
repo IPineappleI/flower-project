@@ -11,7 +11,9 @@ export const OrdersList = () => {
             <div className="listContainer">
                 <NavBar/>
                 <div className="datatable">
-                    <div className="listTitle">Orders</div>
+                    <div className="listTitle">
+                        <h1>Orders</h1>
+                    </div>
                     <OrdersDatatable/>
                 </div>
             </div>

@@ -10,7 +10,9 @@ export const ProductsList = () => {
             <div className="listContainer">
                 <NavBar/>
                 <div className="datatable">
-                    <div className="listTitle">Products</div>
+                    <div className="listTitle">
+                        <h1>Products</h1>
+                    </div>
                     <ProductsDatatable/>
                 </div>
             </div>

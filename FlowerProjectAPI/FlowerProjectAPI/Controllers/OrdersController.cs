@@ -13,37 +13,36 @@ namespace FlowerProjectAPI.Controllers;
 [Route("[controller]")]
 public class OrdersController : ControllerBase
 {
-    public static async Task Create(Order order)
+    private static async Task Create(Order order)
     {
-        if (order.Id != null)
+        const string commandText = "INSERT INTO orders (id, client_id, shopping_cart, price, status) " +
+                                   "VALUES (@id, @clientId, @shoppingCart, @price, @status)";
+
+        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+
+        cmd.Parameters.AddWithValue("id", order.Id);
+        cmd.Parameters.AddWithValue("clientId", order.ClientId);
+        cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(order.ShoppingCart));
+        cmd.Parameters.AddWithValue("price", order.Price);
+        cmd.Parameters.AddWithValue("status", order.Status);
+
+        await cmd.ExecuteNonQueryAsync();
+    }
+    
+    private static decimal TakeItems(Dictionary<int, int> shoppingCart)
+    {
+        decimal sum = 0;
+        
+        foreach (var itemIdCountPair in shoppingCart)
         {
-            const string commandText = "INSERT INTO orders (id, client_id, shopping_cart, price, status) " +
-                                       "VALUES (@id, @clientEmail, @shoppingCart, @price, @status)";
+            var item = ItemsController.ReadById(itemIdCountPair.Key).Result!;
 
-            await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+            new ItemsController().PatchCount(itemIdCountPair.Key, item.Count - itemIdCountPair.Value);
 
-            cmd.Parameters.AddWithValue("id", order.Id);
-            cmd.Parameters.AddWithValue("clientEmail", order.ClientId);
-            cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(order.ShoppingCart));
-            cmd.Parameters.AddWithValue("price", order.Price);
-            cmd.Parameters.AddWithValue("status", order.Status);
-
-            await cmd.ExecuteNonQueryAsync();
+            sum += item.Price * itemIdCountPair.Value;
         }
-        else
-        {
-            const string commandText = "INSERT INTO orders (client_id, shopping_cart, price, status) " +
-                                       "VALUES (@clientEmail, @shoppingCart, @price, @status)";
 
-            await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
-
-            cmd.Parameters.AddWithValue("clientEmail", order.ClientId);
-            cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(order.ShoppingCart));
-            cmd.Parameters.AddWithValue("price", order.Price);
-            cmd.Parameters.AddWithValue("status", order.Status);
-
-            await cmd.ExecuteNonQueryAsync();
-        }
+        return sum;
     }
 
     [HttpPost]
@@ -54,6 +53,13 @@ public class OrdersController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        if (UsersController.ReadById(order.ClientId).Result!.Role != "client")
+        {
+            return BadRequest("user is not a client");
+        }
+
+        order.Price = TakeItems(order.ShoppingCart);
+
         try
         {
             Create(order).Wait();
@@ -63,7 +69,68 @@ public class OrdersController : ControllerBase
             return BadRequest(e.Message);
         }
 
-        return Ok("order created successfully");
+        return Created("Orders", ReadById(order.Id).Result);
+    }
+    
+    private static async Task CreateWithDefaultId(Order order)
+    {
+        const string commandText = "INSERT INTO orders (client_id, shopping_cart, price, status) " +
+                                   "VALUES (@clientId, @shoppingCart, @price, @status)";
+
+        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+        
+        cmd.Parameters.AddWithValue("clientId", order.ClientId);
+        cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(order.ShoppingCart));
+        cmd.Parameters.AddWithValue("price", order.Price);
+        cmd.Parameters.AddWithValue("status", order.Status);
+
+        await cmd.ExecuteNonQueryAsync();
+    }
+    
+    private static async Task<int?> GetCurrentId()
+    {
+        const string commandText = "SELECT last_value FROM orders_id_seq";
+
+        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+
+        return cmd.ExecuteNonQueryAsync().Result;
+    }
+
+    [HttpPost("shoppingCart")]
+    public IActionResult PostShoppingCart(int clientId)
+    {
+        var user = UsersController.ReadById(clientId).Result;
+        if (user == null)
+        {
+            return NotFound("user not found");
+        }
+        if (user.Role != "client")
+        {
+            return BadRequest("user is not a client");
+        }
+
+        var validationResult = Validator.ValidateShoppingCart(user.ShoppingCart!);
+        if (validationResult != ValidationResult.Success)
+        {
+            return BadRequest(validationResult!.ErrorMessage);
+        }
+        
+        var shoppingCart = new Order(-1, clientId, user.ShoppingCart!, TakeItems(user.ShoppingCart!));
+
+        try
+        {
+            CreateWithDefaultId(shoppingCart).Wait();
+        }
+        catch (AggregateException e)
+        {
+            return BadRequest(e.Message);
+        }
+
+        var newOrder = ReadById(GetCurrentId().Result!.Value).Result;
+
+        new UsersController().PatchShoppingCart(clientId, new Dictionary<int, int>());
+
+        return Created("Orders/shoppingCart", newOrder);
     }
 
     private static Order ReadOrder(IDataRecord reader)
@@ -75,13 +142,13 @@ public class OrdersController : ControllerBase
         var price = reader["price"] as decimal? ?? 0;
         var status = reader["status"] as string;
 
-        return new Order(clientId, shoppingCart!, price, status!, id, dateAndTime);
+        return new Order(id!.Value, clientId, shoppingCart!, price, status!, dateAndTime);
     }
-    
+
     private static async Task<List<Order>?> Read()
     {
         var orders = new List<Order>();
-        
+
         const string commandText = "SELECT * FROM orders";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
@@ -94,13 +161,13 @@ public class OrdersController : ControllerBase
 
         return orders;
     }
-    
+
     [HttpGet]
     public IActionResult Get()
     {
         var result = Read().Result;
 
-        return result == null ? BadRequest("orders not found") : Ok(result);
+        return result == null ? NotFound("orders not found") : Ok(result);
     }
 
     private static async Task<Order?> ReadById(int id)
@@ -124,7 +191,33 @@ public class OrdersController : ControllerBase
     {
         var result = ReadById(id).Result;
 
-        return result == null ? BadRequest("order not found") : Ok(result);
+        return result == null ? NotFound("order not found") : Ok(result);
+    }
+
+    private static async Task<List<Order>?> ReadByClientId(int clientId)
+    {
+        var orders = new List<Order>();
+
+        const string commandText = "SELECT * FROM orders WHERE client_id = @clientId";
+
+        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
+        cmd.Parameters.AddWithValue("clientId", clientId);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            orders.Add(ReadOrder(reader));
+        }
+
+        return orders;
+    }
+
+    [HttpGet("byClientId")]
+    public IActionResult GetByClientId(int clientId)
+    {
+        var result = ReadByClientId(clientId).Result;
+
+        return result == null ? NotFound("orders not found") : Ok(result);
     }
 
     private static async Task Update(int id, Order order)
@@ -132,12 +225,12 @@ public class OrdersController : ControllerBase
         const string commandText = @"UPDATE orders
                 SET id = @id, date_and_time = @dateAndTime, client_id = @clientId, 
                     shopping_cart = @shoppingCart, price = @price, status = @status
-                WHERE id = @oldNumber";
+                WHERE id = @oldId";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
-        cmd.Parameters.AddWithValue("oldNumber", id);
-        cmd.Parameters.AddWithValue("id", order.Id!);
+        cmd.Parameters.AddWithValue("oldId", id);
+        cmd.Parameters.AddWithValue("id", order.Id);
         cmd.Parameters.AddWithValue("dateAndTime", order.DateAndTime!);
         cmd.Parameters.AddWithValue("clientId", order.ClientId);
         cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(order.ShoppingCart));
@@ -150,9 +243,9 @@ public class OrdersController : ControllerBase
     [HttpPut]
     public IActionResult Put(int id, Order order)
     {
-        if (Get(id) is BadRequestObjectResult)
+        if (Get(id) is NotFoundObjectResult)
         {
-            return BadRequest("order not found");
+            return NotFound("order not found");
         }
 
         if (!ModelState.IsValid)
@@ -171,14 +264,14 @@ public class OrdersController : ControllerBase
 
         return Ok("order updated successfully");
     }
-    
+
     [HttpPatch("shoppingCart")]
     public IActionResult PatchShoppingCart(int id, Dictionary<int, int> newShoppingCart)
     {
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("order not found");
+            return NotFound("order not found");
         }
 
         var roleValidationResult = Validator.ValidateShoppingCart(newShoppingCart);
@@ -196,17 +289,17 @@ public class OrdersController : ControllerBase
         {
             return BadRequest(e.Message);
         }
-        
+
         return Ok("order shopping cart updated successfully");
     }
-    
+
     [HttpPatch("price")]
     public IActionResult PatchPrice(int id, decimal newPrice)
     {
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("order not found");
+            return NotFound("order not found");
         }
 
         result.Price = newPrice;
@@ -218,17 +311,17 @@ public class OrdersController : ControllerBase
         {
             return BadRequest(e.Message);
         }
-        
+
         return Ok("order price updated successfully");
     }
-    
+
     [HttpPatch("status")]
     public IActionResult PatchStatus(int id, string newStatus)
     {
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("order not found");
+            return NotFound("order not found");
         }
 
         result.Status = newStatus;
@@ -240,7 +333,7 @@ public class OrdersController : ControllerBase
         {
             return BadRequest(e.Message);
         }
-        
+
         return Ok("order status updated successfully");
     }
 
@@ -255,9 +348,9 @@ public class OrdersController : ControllerBase
     [HttpDelete]
     public IActionResult Delete(int id)
     {
-        if (Get(id) is BadRequestObjectResult)
+        if (Get(id) is NotFoundObjectResult)
         {
-            return BadRequest("order not found");
+            return NoContent();
         }
 
         try

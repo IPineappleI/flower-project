@@ -3,6 +3,7 @@ using System.Data;
 using FlowerProjectAPI.Models;
 using FlowerProjectAPI.Utility;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Npgsql;
 using Validator = FlowerProjectAPI.Utility.Validator;
 
@@ -12,26 +13,11 @@ namespace FlowerProjectAPI.Controllers;
 [Route("[controller]")]
 public class UsersController : ControllerBase
 {
-    [HttpGet("ConfirmEmail")]
-    public IActionResult ConfirmEmail(string email, string token)
-    {
-        var emailToken = TokensController.ReadByEmail(email).Result;
-
-        if (emailToken == null)
-        {
-            return BadRequest($"confirmation token for email {email} not found");
-        }
-
-        return emailToken.Token != token
-            ? BadRequest($"incorrect confirmation token for email {email}")
-            : PatchEmailConfirmed(email, true);
-    }
-
     private static async Task Create(User user)
     {
         const string commandText =
-            "INSERT INTO users (first_name, last_name, email, phone_number, password, role) " +
-            "VALUES (@firstName, @lastName, @email, @phoneNumber, @password, @role)";
+            "INSERT INTO users (first_name, last_name, email, phone_number, password, role, shopping_cart) " +
+            "VALUES (@firstName, @lastName, @email, @phoneNumber, @password, @role, @shoppingCart)";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
@@ -41,8 +27,20 @@ public class UsersController : ControllerBase
         cmd.Parameters.AddWithValue("phoneNumber", user.PhoneNumber);
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
+        cmd.Parameters.AddWithValue("shoppingCart", 
+            user.ShoppingCart == null ? null : JsonConvert.SerializeObject(user.ShoppingCart));
 
         await cmd.ExecuteNonQueryAsync();
+    }
+
+    private void CreateTokenAndSendEmail(string email)
+    {
+        var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+        TokensController.Create(new EmailToken(email, token)).Wait();
+
+        var link = Url.Action(nameof(ConfirmEmail), "Users",
+            new { email, token }, Request.Scheme);
+        EmailSender.SendEmailConfirmationLink(email, link);
     }
 
     [HttpPost]
@@ -53,30 +51,22 @@ public class UsersController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        User newUser;
+
         try
         {
             Create(user).Wait();
 
-            var newUser = ReadByEmail(user.Email).Result;
-            if (newUser!.Role == "client")
-            {
-                OrdersController.Create(new Order(newUser.Id, new Dictionary<int, int>(),
-                    0, "Shopping Cart", newUser.ShoppingCartId)).Wait();
-            }
+            newUser = ReadByEmail(user.Email).Result!;
 
-            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-            TokensController.Create(new EmailToken(newUser.Email, token)).Wait();
-
-            var link = Url.Action(nameof(ConfirmEmail), "Users",
-                new { email = newUser.Email, token }, Request.Scheme);
-            EmailSender.SendEmailConfirmationLink(newUser.Email, link);
+            CreateTokenAndSendEmail(newUser.Email);
         }
         catch (AggregateException e)
         {
             return BadRequest(e.Message);
         }
 
-        return Ok("user created successfully");
+        return Created("Users", newUser);
     }
 
     private static User ReadUser(IDataRecord reader)
@@ -88,11 +78,15 @@ public class UsersController : ControllerBase
         var phoneNumber = reader["phone_number"] as string;
         var password = reader["password"] as string;
         var role = reader["role"] as string;
-        var shoppingCartId = reader["shopping_cart_id"] as int?;
+        var shoppingCart = JsonConvert.DeserializeObject<Dictionary<int, int>>((reader["shopping_cart"] as string)!);
         var emailConfirmed = reader["email_confirmed"] as bool?;
 
-        return new User(email!, phoneNumber!, password!, role!, firstName!, lastName,
-            emailConfirmed!.Value, id!.Value, shoppingCartId);
+        var user = new User(firstName!, lastName, email!, phoneNumber!, password!, role!, shoppingCart, id!.Value)
+            {
+                EmailConfirmed = emailConfirmed!.Value
+            };
+
+        return user;
     }
 
     private static async Task<List<User>?> Read()
@@ -117,10 +111,10 @@ public class UsersController : ControllerBase
     {
         var result = Read().Result;
 
-        return result == null ? BadRequest("users not found") : Ok(result);
+        return result == null ? NotFound("users not found") : Ok(result);
     }
 
-    private static async Task<User?> ReadById(int id)
+    public static async Task<User?> ReadById(int id)
     {
         const string commandText = "SELECT * FROM users WHERE id = @id";
 
@@ -143,7 +137,7 @@ public class UsersController : ControllerBase
     {
         var result = ReadById(id).Result;
 
-        return result == null ? BadRequest("user not found") : Ok(result);
+        return result == null ? NotFound("user not found") : Ok(result);
     }
 
     private static async Task<User?> ReadByEmail(string email)
@@ -163,55 +157,31 @@ public class UsersController : ControllerBase
 
         return null;
     }
+    
+    [HttpGet("ConfirmEmail")]
+    public IActionResult ConfirmEmail(string email, string token)
+    {
+        var emailToken = TokensController.ReadByEmail(email).Result;
+
+        if (emailToken == null)
+        {
+            return NotFound($"confirmation token for email {email} not found");
+        }
+
+        return emailToken.Token != token
+            ? BadRequest("incorrect confirmation token")
+            : PatchEmailConfirmed(email, true);
+    }
 
     [HttpGet("authorizeByEmail")]
     public IActionResult AuthorizeByEmail([EmailAddress] string email,
-        [CustomValidation(typeof(Validator), "ValidatePassword")]
-        string password)
+        [CustomValidation(typeof(Validator), "ValidatePassword")] string password)
     {
         var result = ReadByEmail(email).Result;
 
         if (result == null)
         {
-            return BadRequest("user not found");
-        }
-
-        if (result.Password != password)
-        {
-            return BadRequest("incorrect password");
-        }
-
-        return result.EmailConfirmed ? Ok(result) : BadRequest($"email {result.Email} is not confirmed");
-    }
-
-    private static async Task<User?> ReadByPhoneNumber(string phoneNumber)
-    {
-        const string commandText = "SELECT * FROM users WHERE phone_number = @phoneNumber";
-
-        await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
-
-        cmd.Parameters.AddWithValue("phoneNumber", phoneNumber);
-
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            var client = ReadUser(reader);
-            return client;
-        }
-
-        return null;
-    }
-
-    [HttpGet("authorizeByPhoneNumber")]
-    public IActionResult AuthorizeByPhoneNumber([Phone] string phoneNumber,
-        [CustomValidation(typeof(Validator), "ValidatePassword")]
-        string password)
-    {
-        var result = ReadByPhoneNumber(phoneNumber).Result;
-
-        if (result == null)
-        {
-            return BadRequest("user not found");
+            return NotFound("user not found");
         }
 
         if (result.Password != password)
@@ -227,7 +197,7 @@ public class UsersController : ControllerBase
         const string commandText = @"UPDATE users
                 SET id = @id, first_name = @firstName, last_name = @lastName, email = @email, 
                     phone_number = @phoneNumber, password = @password, role = @role, 
-                    shopping_cart_id = @shoppingCartId, email_confirmed = @emailConfirmed
+                    shopping_cart = @shoppingCart, email_confirmed = @emailConfirmed
                 WHERE id = @oldId";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
@@ -240,8 +210,9 @@ public class UsersController : ControllerBase
         cmd.Parameters.AddWithValue("phoneNumber", user.PhoneNumber);
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
-        cmd.Parameters.AddWithValue("shoppingCartId", user.ShoppingCartId!);
         cmd.Parameters.AddWithValue("emailConfirmed", user.EmailConfirmed);
+        cmd.Parameters.AddWithValue("shoppingCart", 
+            user.ShoppingCart == null ? null : JsonConvert.SerializeObject(user.ShoppingCart));
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -249,14 +220,21 @@ public class UsersController : ControllerBase
     [HttpPut]
     public IActionResult Put(int id, User user)
     {
-        if (Get(id) is BadRequestObjectResult)
+        var result = ReadById(id).Result;
+        
+        if (result == null)
         {
-            return BadRequest("user not found");
+            return NotFound("user not found");
         }
 
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
+        }
+        
+        if (user.Email == result.Email && result.EmailConfirmed)
+        {
+            user.EmailConfirmed = true;
         }
 
         try
@@ -268,25 +246,39 @@ public class UsersController : ControllerBase
             return BadRequest(e.Message);
         }
 
+        if (user.Email != result.Email)
+        {
+            TokensController.DeleteToken(result.Email).Wait();
+            
+            CreateTokenAndSendEmail(user.Email);
+        }
+
         return Ok("user updated successfully");
     }
-
+    
     [HttpPatch("email")]
     public IActionResult PatchEmail(int id, string newEmail)
     {
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("user not found");
+            return NotFound("user not found");
         }
 
-        var emailChecker = new EmailAddressAttribute();
+        var emailChecker = new RegularExpressionAttribute(@"^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$");
         if (!emailChecker.IsValid(newEmail))
         {
-            return BadRequest("newEmail is not a valid e-mail address");
+            return BadRequest($"{newEmail} is not a valid email address");
         }
 
-        result.Email = newEmail;
+        var oldEmail = result.Email;
+        
+        if (newEmail != oldEmail)
+        {
+            result.EmailConfirmed = false;
+            result.Email = newEmail;
+        }
+
         try
         {
             Update(id, result).Wait();
@@ -294,6 +286,13 @@ public class UsersController : ControllerBase
         catch (AggregateException e)
         {
             return BadRequest(e.Message);
+        }
+
+        if (newEmail != oldEmail)
+        {
+            TokensController.DeleteToken(oldEmail).Wait();
+            
+            CreateTokenAndSendEmail(newEmail);
         }
 
         return Ok("user email updated successfully");
@@ -305,13 +304,14 @@ public class UsersController : ControllerBase
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("user not found");
+            return NotFound("user not found");
         }
 
-        var emailChecker = new PhoneAttribute();
-        if (!emailChecker.IsValid(newPhoneNumber))
+        var phoneChecker = new RegularExpressionAttribute(
+            @"^\(?\+?[0-9]{1,3}\)? ?-?[0-9]{1,3} ?-?[0-9]{3,5} ?-?[0-9]{4}( ?-?[0-9]{3})?$");
+        if (!phoneChecker.IsValid(newPhoneNumber))
         {
-            return BadRequest("newPhoneNumber is not a valid phone number");
+            return BadRequest($"{newPhoneNumber} is not a valid phone number");
         }
 
         result.PhoneNumber = newPhoneNumber;
@@ -333,7 +333,7 @@ public class UsersController : ControllerBase
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("user not found");
+            return NotFound("user not found");
         }
 
         var passwordValidationResult = Validator.ValidatePassword(newPassword);
@@ -354,14 +354,14 @@ public class UsersController : ControllerBase
 
         return Ok("user password updated successfully");
     }
-
+    
     [HttpPatch("role")]
     public IActionResult PatchRole(int id, string newRole)
     {
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("user not found");
+            return NotFound("user not found");
         }
 
         var roleValidationResult = Validator.ValidateRole(newRole);
@@ -383,21 +383,21 @@ public class UsersController : ControllerBase
         return Ok("user role updated successfully");
     }
 
-    [HttpPatch("shoppingCartId")]
-    public IActionResult PatchShoppingCartId(int id, int newShoppingCartId)
+    [HttpPatch("shoppingCart")]
+    public IActionResult PatchShoppingCart(int id, Dictionary<int, int>? newShoppingCart)
     {
         var result = ReadById(id).Result;
         if (result == null)
         {
-            return BadRequest("user not found");
+            return NotFound("user not found");
         }
 
-        if (result.Role != "client")
+        if (newShoppingCart != null && result.Role != "client")
         {
             return BadRequest("only clients can have a shopping cart");
         }
 
-        result.ShoppingCartId = newShoppingCartId;
+        result.ShoppingCart = newShoppingCart;
         try
         {
             Update(id, result).Wait();
@@ -416,7 +416,7 @@ public class UsersController : ControllerBase
         var result = ReadByEmail(email).Result;
         if (result == null)
         {
-            return BadRequest("user not found");
+            return NotFound("user not found");
         }
 
         result.EmailConfirmed = emailConfirmed;
@@ -429,7 +429,7 @@ public class UsersController : ControllerBase
             return BadRequest(e.Message);
         }
 
-        return Ok("user email confirmation status updated successfully");
+        return Ok("email confirmation status updated successfully");
     }
 
     private static async Task DeleteUser(int id)
@@ -443,9 +443,9 @@ public class UsersController : ControllerBase
     [HttpDelete]
     public IActionResult Delete(int id)
     {
-        if (Get(id) is BadRequestObjectResult)
+        if (Get(id) is NotFoundObjectResult)
         {
-            return BadRequest("user not found");
+            return NoContent();
         }
 
         try

@@ -11,9 +11,13 @@ public class User
 
     public string? LastName { get; set; }
 
-    [Required] [EmailAddress] public string Email { get; set; }
+    [Required]
+    [RegularExpression(@"^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$")]
+    public string Email { get; set; }
 
-    [Required] [Phone] public string PhoneNumber { get; set; }
+    [Required]
+    [RegularExpression(@"^\(?\+?[0-9]{1,3}\)? ?-?[0-9]{1,3} ?-?[0-9]{3,5} ?-?[0-9]{4}( ?-?[0-9]{3})?$")]
+    public string PhoneNumber { get; set; }
 
     [Required]
     [CustomValidation(typeof(Validator), "ValidatePassword")]
@@ -22,13 +26,13 @@ public class User
     [Required]
     [CustomValidation(typeof(Validator), "ValidateRole")]
     public string Role { get; set; }
-
-    public int? ShoppingCartId { get; set; }
     
     public bool EmailConfirmed { get; set; }
+    
+    public Dictionary<int, int>? ShoppingCart { get; set; }
 
-    public User(string email, string phoneNumber, string password, string role, string firstName, string? lastName, 
-        bool emailConfirmed = false, int id = 0, int? shoppingCartId = null)
+    public User(string firstName, string? lastName, string email, string phoneNumber, string password, string role, 
+        Dictionary<int, int>? shoppingCart = null, int id = 0)
     {
         Id = id;
         FirstName = firstName;
@@ -37,13 +41,17 @@ public class User
         PhoneNumber = phoneNumber;
         Password = password;
         Role = role;
-        EmailConfirmed = emailConfirmed;
+        EmailConfirmed = false;
 
         if (role != "client")
         {
-            shoppingCartId = null;
+            shoppingCart = null;
+        }
+        else if (shoppingCart == null)
+        {
+            shoppingCart = new Dictionary<int, int>();
         }
 
-        ShoppingCartId = shoppingCartId;
+        ShoppingCart = shoppingCart;
     }
 }

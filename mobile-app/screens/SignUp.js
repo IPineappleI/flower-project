@@ -1,21 +1,21 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React from 'react';
 import {Text, SafeAreaView, View, TouchableOpacity, Alert} from 'react-native';
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {Formik} from "formik";
 import FormField from "../components/FormField";
 import {registrationValidationSchema} from "../validation";
 import {globalStyles} from "../styles/globalStyles";
 import axios from "axios";
 
-export default function Registration({navigation}) {
+export default function SignUp({navigation}) {
     function onSubmitHandler(values) {
-        console.log(values)
         let user = {
-            "firstName": values[0],
-            "lastName": values[1],
-            "email": values[2],
-            "phoneNumber": values[3],
-            "password": values[4],
+            "firstName": values.firstName,
+            "lastName": values.lastName,
+            "email": values.email,
+            "phoneNumber": values.phoneNumber,
+            "password": values.password,
             "role": "client"
         }
 
@@ -23,24 +23,33 @@ export default function Registration({navigation}) {
             .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(user[k]))
             .join('&');
 
-        let url = "https://localhost:7153/Users";
+        let url = "http://localhost:7153/Users?" + query;
 
         try {
-            const response = axios.post(url, user);
+            const response = axios.post(url);
 
-            response
-                .then((res) => {
-                    localStorage.setItem("user", JSON.stringify(res?.data))
-                })
-                .catch((error) => console.log(error.response))
+            response.then(async (res) => {
+                await AsyncStorage.setItem("user", res.data);
+
+                Alert.alert("Please verify your email!","Verification link was sent to entered email!")
+                navigation.navigate("SignIn");
+            }).catch((error) => {
+                let res = error.response;
+                if (res.data.includes("email addresses must be unique")) {
+                    Alert.alert("Registered email", "Want to sign in?", [
+                        {
+                            text: "Yes",
+                            onPress: navigation.navigate("SignIn")
+                        },
+                        {
+                            text: "No"
+                        }
+                    ]);
+                }
+            })
         } catch (error) {
             console.log(error)
         }
-
-        Alert.alert(
-            "Register Successfully!",
-            "Form data: " + JSON.stringify(values)
-        );
     }
 
     function isFormValid(isValid, touched) {
@@ -102,7 +111,7 @@ export default function Registration({navigation}) {
 
                                 <FormField
                                     field="email"
-                                    label="Email Address"
+                                    label="Email"
                                     values={values}
                                     touched={touched}
                                     errors={errors}
@@ -112,7 +121,7 @@ export default function Registration({navigation}) {
 
                                 <FormField
                                     field="phoneNumber"
-                                    label="Phone Number"
+                                    label="Phone number"
                                     values={values}
                                     touched={touched}
                                     errors={errors}
@@ -133,7 +142,7 @@ export default function Registration({navigation}) {
 
                                 <FormField
                                     field="confirmPassword"
-                                    label="Confirm Password"
+                                    label="Confirm password"
                                     secureTextEntry={true}
                                     values={values}
                                     touched={touched}

@@ -1,69 +1,63 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React from 'react';
 import {Text, SafeAreaView, View, TouchableOpacity, Alert} from 'react-native';
-import {globalStyles} from "../styles/globalStyles";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {authorizationValidationSchema} from "../validation";
+import {globalStyles} from "../styles/globalStyles";
+import FormField from "../components/FormField";
 import {Formik} from "formik";
 import axios from "axios";
-import FormField from "../components/FormField";
-import {authorizationValidationSchema} from "../validation";
-import Catalog from "./Catalog";
 
-export default function Authorization({navigation}) {
-    const getUser = () => {
-        return fetch('https://reactnative.dev/movies.json')
-            .then(response => response.json())
-            .then(json => {
-                return json.movies;
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    };
-
+export default function SignIn({navigation}) {
     function onSignInHandler(values) {
-        console.log(values);
-
         let user = {
-            "email": values.emailOrPhoneNumber,
-            "password": values.password
-        }
+                "email": values.email,
+                "password": values.password
+            }
 
         let query = Object.keys(user)
             .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(user[k]))
             .join('&');
+
         if (query === null) {
             console.log("Null query");
         } else {
-            console.log("query = " + query);
+            console.log("SignIn query = " + query);
         }
 
-        let url = "http://localhost:5022/Users/authorizeByEmail?" + query;
+        let url = ("http://localhost:7153/Users/authorizeByEmail?" + query);
+
+        console.log(url);
 
         try {
-            console.log("url = " + url);
-
             const response = axios.get(url);
 
-            response
-                .then((res) => {
-                    console.log(res.data);
-                })
-                .catch((error) => console.log("error - " + error))
-
-            //navigation.navigate('Home', {screen: 'Catalog'});
-
+            response.then((res) => {
+                AsyncStorage.setItem("user", res.data)
+                    .then(navigation.navigate('Home', {screen: 'Catalog'}));
+            }).catch((error) => {
+                    let res = error.response;
+                    if (res.data === "user not found") {
+                        Alert.alert("Unsigned user", "Want to sign up?", [
+                            {
+                                text: "Yes",
+                                onPress: () => onSignUpHandler()
+                            },
+                            {
+                                text: "No"
+                            }
+                        ])
+                    } else if (res.data === "incorrect password") {
+                        Alert.alert("Wrong password!");
+                    }
+                });
         } catch (error) {
             console.log(error);
         }
-
-        // Alert.alert(
-        //     "Signed In Successfully!",
-        //     "Form data: " + JSON.stringify(values)
-        // );
     }
 
     function onSignUpHandler() {
-        navigation.navigate("Registration");
+        navigation.navigate("SignUp");
     }
 
     function isFormValid(isValid, touched) {
@@ -81,7 +75,7 @@ export default function Authorization({navigation}) {
                 >
                     <Formik
                         initialValues={{
-                            emailOrPhoneNumber: "",
+                            email: "",
                             password: "",
                         }}
                         onSubmit={onSignInHandler}
@@ -98,8 +92,8 @@ export default function Authorization({navigation}) {
                           }) => (
                             <>
                                 <FormField
-                                    field="emailOrPhoneNumber"
-                                    label="Email or Phone Number"
+                                    field="email"
+                                    label="Email"
                                     values={values}
                                     touched={touched}
                                     errors={errors}

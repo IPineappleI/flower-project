@@ -1,10 +1,10 @@
 import React from "react";
-import {SafeAreaView} from "react-native";
+import {SafeAreaView, Text} from "react-native";
 
 export default function Catalog({navigation}) {
     return(
-        <SafeAreaView>
-
+        <SafeAreaView style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
+            <Text>Catalog</Text>
         </SafeAreaView>
     );
 }

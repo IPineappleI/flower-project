@@ -26,7 +26,7 @@ export const LoginPage = () => {
 
             response
                 .then((res) => {
-                    localStorage.setItem("user", JSON.stringify(res?.data))
+                    localStorage.setItem("user", JSON.stringify(res?.data.id))
                     //if(localStorage.getItem("user").role === "admin")
                     navigate("/home");
                 })

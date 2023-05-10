@@ -1,13 +1,18 @@
-import "./NewUser.scss"
+import "./EditUser.scss"
 import SideBar from "../../Components/SideBar/SideBar";
 import NavBar from "../../Components/NavBar/NavBar";
-import {Link} from 'react-router-dom';
-import {useState} from "react";
+import {Link, useParams} from 'react-router-dom';
+import {useEffect, useState} from "react";
 import axios from "axios";
 import Modal from 'react-modal';
+import Axios from "axios";
 
 
 const NewUser = () => {
+    const params = useParams();
+    const [data, setData] = useState([]);
+    const [loaded, setLoaded] = useState(false);
+
     const [role, setRole] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -18,9 +23,22 @@ const NewUser = () => {
     const [showSuccessModal, setSuccessModal] = useState(false);
     const [showFailModal, setFailModal] = useState(false);
 
-    const create = () => {
+    useEffect(() => {
+        if (loaded) {
+            return;
+        }
+        let url = "https://localhost:7153/Users/byId?id=" + params.userId;
 
-        let data = {
+        Axios.get(url)
+            .then(
+                (res) => {
+                    setData(res?.data);
+                });
+        setLoaded(true);
+    })
+
+    const save = () => {
+        let newData = {
             "firstName": firstName,
             "lastName": lastName,
             "email": email,
@@ -28,17 +46,20 @@ const NewUser = () => {
             "password": password,
             "role": role,
         };
-        const response = axios({
-            method: 'post',
-            url: "https://localhost:7153/Users",
-            headers: {},
-            data: data
-        }).then(() => {
-            setSuccessModal(true);
-        }).catch((error) => {
-            console.log(error);
-            setFailModal(true);
-        });
+
+        console.log(newData)
+
+        // const response = axios({
+        //     method: 'post',
+        //     url: "https://localhost:7153/Users",
+        //     headers: {},
+        //     data: data
+        // }).then(() => {
+        //     setSuccessModal(true);
+        // }).catch((error) => {
+        //     console.log(error);
+        //     setFailModal(true);
+        // });
     }
 
     return (
@@ -47,7 +68,7 @@ const NewUser = () => {
             <div className="newContainer">
                 <NavBar/>
                 <div className="top">
-                    <h1>New User</h1>
+                    <h1>Edit User</h1>
                 </div>
                 <div className="bottom">
                     <div className="left">
@@ -65,7 +86,7 @@ const NewUser = () => {
                             <div className="formInput">
                                 <label>Phone number</label>
                                 <input value={phone} onChange={(e) => setPhone(e.target.value)} type="text"
-                                       placeholder="88888888888"/>
+                                       placeholder="+12345678901"/>
                             </div>
                         </form>
                     </div>
@@ -73,18 +94,18 @@ const NewUser = () => {
                         <form>
                             <div className="formInput">
                                 <label>Password</label>
-                                <input value={password} onChange={(e) => setPassword(e.target.value)} type="password"
-                                       placeholder="*******"/>
+                                <input value={password} onChange={(e) => setPassword(e.target.value)} type="text"
+                                       placeholder={data.password}/>
                             </div>
                             <div className="formInput">
                                 <label>Role</label>
                                 <input value={role} onChange={(e) => setRole(e.target.value)} type="text"
-                                       placeholder="client | manager | admin"/>
+                                       placeholder={data.role}/>
                             </div>
                             <div className="formInput">
                                 <label>Email</label>
                                 <input value={email} onChange={(e) => setEmail(e.target.value)} type="email"
-                                       placeholder="client@mail.com"/>
+                                       placeholder={data.email}/>
                             </div>
                         </form>
                     </div>
@@ -92,21 +113,7 @@ const NewUser = () => {
                 <Link to="/users">
                     <button>Cancel</button>
                 </Link>
-                <button onClick={create}>Create a new user</button>
-                <Modal ariaHideApp={false} isOpen={showSuccessModal} onRequestClose={() => setSuccessModal(false)}>
-                    <div className="modal-content">
-                        User created successfully
-                        <button onClick={() => setSuccessModal(false)}> OK </button>
-                    </div>
-                </Modal>
-                <Modal ariaHideApp={false} isOpen={showFailModal} onRequestClose={() => setFailModal(false)}>
-                    <div className="modal-content">
-                        Can't create user, please check if info is correct.
-                        <button onClick={() => setFailModal(false)}>
-                            Close
-                        </button>
-                    </div>
-                </Modal>
+                <button onClick={save}>Save changes</button>
             </div>
         </div>
     )

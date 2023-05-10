@@ -38,6 +38,7 @@ export function CategoriesDatatable() {
             renderCell: (params) => {
                 return (
                     <div className="cellAction">
+                        <div className="viewButton">View</div>
                         <div className="editButton">Edit</div>
                         <div className="deleteButton" onClick={() => handleDelete(params.row.id)}>Delete</div>
                     </div>
@@ -52,7 +53,6 @@ export function CategoriesDatatable() {
                 columns={columns.concat(actionColumn)}
                 pageSize={10}
                 rowsPerPageOptions={[10]}
-                checkboxSelection
             />
         </div>
     )

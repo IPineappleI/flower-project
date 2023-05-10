@@ -12,7 +12,22 @@ const columns = [
     {field: 'email', headerName: "Client's email", width: 200},
     {field: 'phoneNumber', headerName: 'Phone number', width: 150},
     {field: 'role', headerName: "Role", width: 100},
-    {field: 'shoppingCartId', headerName: "Shopping cart id", width: 150},
+    {
+        field: 'shoppingCart',
+        headerName: "Shopping cart",
+        valueGetter: (cart) => {
+            const shop = [
+                {id: 0, itemId: 2},
+            ];
+            let res = shop.map(function (item) {
+                return "item id: " + item.id + ", quantity: " + item.itemId
+            });
+            return res;
+            // const list = cart.map((index, item) => <div key={index}>{item}</div>
+            // );
+        },
+        width: 150
+    },
 ];
 
 export function UsersDatatable() {
@@ -28,7 +43,7 @@ export function UsersDatatable() {
         Axios.get("https://localhost:7153/Users")
             .then(
                 (res) => {
-                    setUsers(res?.data);
+                    setUsers(res?.data)
                 });
         setLoaded(true);
     })
@@ -46,9 +61,11 @@ export function UsersDatatable() {
             renderCell: (params) => {
                 return (
                     <div className="cellAction">
-                        <div className="editButton">Edit</div>
-                        <Link to={"/users/" + params.row.id} style={{textDecoration: "none"}}>
+                        <Link to={"/users/view/" + params.row.id} style={{textDecoration: "none"}}>
                             <div className="viewButton">View</div>
+                        </Link>
+                        <Link to={"/users/edit/" + params.row.id} style={{textDecoration: "none"}}>
+                            <div className="editButton">Edit</div>
                         </Link>
                         <div className="deleteButton" onClick={() => handleDelete(params.row.id)}>Delete</div>
                     </div>
@@ -63,7 +80,6 @@ export function UsersDatatable() {
                 columns={columns.concat(actionColumn)}
                 pageSize={10}
                 rowsPerPageOptions={[10]}
-                checkboxSelection
             />
         </div>
     )

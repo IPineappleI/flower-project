@@ -2,9 +2,10 @@ import "./SingleUser.scss"
 import SideBar from "../../Components/SideBar/SideBar";
 import NavBar from "../../Components/NavBar/NavBar";
 import {OrdersDatatable} from "../../Components/OrdersDatatable/OrdersDatatable";
-import {Link, useParams} from "react-router-dom";
+import {useParams} from "react-router-dom";
 import {useState, useEffect} from "react";
 import Axios from "axios";
+import Chart from "../../Components/chart/Chart";
 
 function SingleUser() {
 
@@ -61,6 +62,7 @@ function SingleUser() {
                         </div>
                     </div>
                     <div className="right">
+                        <Chart aspect={3/1} title="User Spending (Last 6 Months)"/>
                     </div>
                 </div>
                 <div className="bottom">

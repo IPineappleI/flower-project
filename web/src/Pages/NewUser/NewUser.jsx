@@ -4,8 +4,7 @@ import NavBar from "../../Components/NavBar/NavBar";
 import {Link} from 'react-router-dom';
 import {useState} from "react";
 import axios from "axios";
-import Modal from 'react-modal';
-
+import ConfirmModal from "../../Components/Modal/ConfirmModal/ConfirmModal"
 
 const NewUser = () => {
     const [role, setRole] = useState('');
@@ -20,6 +19,10 @@ const NewUser = () => {
 
     const create = () => {
 
+        if(window.confirm("Are you sure to delete user?")) {
+            console.log("OK");
+        }
+
         let data = {
             "firstName": firstName,
             "lastName": lastName,
@@ -28,7 +31,7 @@ const NewUser = () => {
             "password": password,
             "role": role,
         };
-        const response = axios({
+        axios({
             method: 'post',
             url: "https://localhost:7153/Users",
             headers: {},
@@ -92,22 +95,9 @@ const NewUser = () => {
                 <Link to="/users">
                     <button>Cancel</button>
                 </Link>
-                <button onClick={create}>Create a new user</button>
-                <Modal ariaHideApp={false} isOpen={showSuccessModal} onRequestClose={() => setSuccessModal(false)}>
-                    <div className="modal-content">
-                        User created successfully
-                        <button onClick={() => setSuccessModal(false)}> OK </button>
-                    </div>
-                </Modal>
-                <Modal ariaHideApp={false} isOpen={showFailModal} onRequestClose={() => setFailModal(false)}>
-                    <div className="modal-content">
-                        Can't create user, please check if info is correct.
-                        <button onClick={() => setFailModal(false)}>
-                            Close
-                        </button>
-                    </div>
-                </Modal>
+                <button onClick={() => setSuccessModal(true)}>Create a new user</button>
             </div>
+            <ConfirmModal open={showSuccessModal} onClose={() => setSuccessModal(false)} text="Are you sure"/>
         </div>
     )
 }

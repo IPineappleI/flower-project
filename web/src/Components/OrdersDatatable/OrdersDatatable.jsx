@@ -2,6 +2,7 @@ import "./OrdersDatatable.scss"
 import {DataGrid} from '@mui/x-data-grid';
 import React, {useEffect, useState} from "react";
 import Axios from "axios";
+import ConfirmModal from "../Modal/ConfirmModal/ConfirmModal";
 
 const columns = [
     {field: 'id', headerName: 'Id', width: 100},
@@ -13,10 +14,14 @@ const columns = [
 ];
 
 export function OrdersDatatable() {
+    const [url, setUrl] = useState("");
 
     const [orders, setOrders] = useState([]);
 
     const [loaded, setLoaded] = useState(false);
+
+    const [showModal, setShowModal] = useState(false);
+
 
     useEffect(() => {
         if (loaded)
@@ -29,11 +34,6 @@ export function OrdersDatatable() {
         setLoaded(true);
     })
 
-    const handleDelete = (id) => {
-        let url = "https://localhost:7153/Orders?id=" + id;
-        Axios.delete(url).then(() => setLoaded(false));
-    }
-
     const actionColumn = [
         {
             field: 'action',
@@ -44,19 +44,32 @@ export function OrdersDatatable() {
                     <div className="cellAction">
                         <div className="viewButton">View</div>
                         <div className="editButton">Edit</div>
-                        <div className="deleteButton" onClick={() => handleDelete(params.row.id)}>Delete</div>
+                        <div className="deleteButton" onClick={() => {
+                            setShowModal(true);
+                            setUrl("https://localhost:7153/Orders?id=" + params.row.id)
+                        }}>Delete
+                        </div>
                     </div>
                 )
             }
         }
     ]
     return (
-        <div className="datatable">
-            <DataGrid
-                rows={orders}
-                columns={columns.concat(actionColumn)}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
+        <div className="data">
+            <div className="datatable">
+                <DataGrid
+                    rows={orders}
+                    columns={columns.concat(actionColumn)}
+                    pageSize={10}
+                    rowsPerPageOptions={[10]}
+                />
+            </div>
+            <ConfirmModal
+                open={showModal}
+                onClose={() => setShowModal(false)}
+                text="Are you sure to delete order?"
+                url={url}
+                loaded={() => setLoaded(false)}
             />
         </div>
     )

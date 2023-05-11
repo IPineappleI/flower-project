@@ -4,6 +4,7 @@ import React, {useEffect, useState} from "react";
 import Axios from "axios";
 import SingleUser from "../../Pages/SingleUser/SingleUser";
 import {Link} from "react-router-dom";
+import ConfirmModal from "../Modal/ConfirmModal/ConfirmModal";
 
 const columns = [
     {field: 'id', headerName: 'Id', width: 100},
@@ -32,9 +33,13 @@ const columns = [
 
 export function UsersDatatable() {
 
+    const [url, setUrl] = useState("");
+
     const [users, setUsers] = useState([]);
 
     const [loaded, setLoaded] = useState(false);
+
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         if (loaded) {
@@ -47,11 +52,6 @@ export function UsersDatatable() {
                 });
         setLoaded(true);
     })
-
-    const handleDelete = (id) => {
-        let url = "https://localhost:7153/Users?id=" + id;
-        Axios.delete(url).then(() => setLoaded(false));
-    }
 
     const actionColumn = [
         {
@@ -67,19 +67,32 @@ export function UsersDatatable() {
                         <Link to={"/users/edit/" + params.row.id} style={{textDecoration: "none"}}>
                             <div className="editButton">Edit</div>
                         </Link>
-                        <div className="deleteButton" onClick={() => handleDelete(params.row.id)}>Delete</div>
+                        <div className="deleteButton" onClick={() => {
+                            setShowModal(true);
+                            setUrl("https://localhost:7153/Users?id=" + params.row.id)
+                        }}>Delete
+                        </div>
                     </div>
                 )
             }
         }
     ]
     return (
-        <div className="datatable">
-            <DataGrid
-                rows={users}
-                columns={columns.concat(actionColumn)}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
+        <div className="data">
+            <div className="datatable">
+                <DataGrid
+                    rows={users}
+                    columns={columns.concat(actionColumn)}
+                    pageSize={10}
+                    rowsPerPageOptions={[10]}
+                />
+            </div>
+            <ConfirmModal
+                open={showModal}
+                onClose={() => setShowModal(false)}
+                text="Are you sure to delete user?"
+                url={url}
+                loaded={() => setLoaded(false)}
             />
         </div>
     )

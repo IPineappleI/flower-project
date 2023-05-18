@@ -3,6 +3,7 @@ import {DataGrid} from '@mui/x-data-grid';
 import React, {useEffect, useState} from "react";
 import Axios from "axios";
 import ConfirmModal from "../Modal/ConfirmModal/ConfirmModal";
+import {Link} from "react-router-dom";
 
 const columns = [
     {field: 'id', headerName: 'Id', width: 100},
@@ -42,8 +43,12 @@ export function OrdersDatatable() {
             renderCell: (params) => {
                 return (
                     <div className="cellAction">
-                        <div className="viewButton">View</div>
-                        <div className="editButton">Edit</div>
+                        <Link to={"/orders/view/" + params.row.id} style={{textDecoration: "none"}}>
+                            <div className="viewButton">View</div>
+                        </Link>
+                        <Link to={"/orders/edit/" + params.row.id} style={{textDecoration: "none"}}>
+                            <div className="editButton">Edit</div>
+                        </Link>
                         <div className="deleteButton" onClick={() => {
                             setShowModal(true);
                             setUrl("https://localhost:7153/Orders?id=" + params.row.id)

@@ -2,7 +2,6 @@ import "./UsersDatatable.scss"
 import {DataGrid} from '@mui/x-data-grid';
 import React, {useEffect, useState} from "react";
 import Axios from "axios";
-import SingleUser from "../../Pages/SingleUser/SingleUser";
 import {Link} from "react-router-dom";
 import ConfirmModal from "../Modal/ConfirmModal/ConfirmModal";
 
@@ -13,22 +12,7 @@ const columns = [
     {field: 'email', headerName: "Client's email", width: 200},
     {field: 'phoneNumber', headerName: 'Phone number', width: 150},
     {field: 'role', headerName: "Role", width: 100},
-    {
-        field: 'shoppingCart',
-        headerName: "Shopping cart",
-        valueGetter: (cart) => {
-            const shop = [
-                {id: 0, itemId: 2},
-            ];
-            let res = shop.map(function (item) {
-                return "item id: " + item.id + ", quantity: " + item.itemId
-            });
-            return res;
-            // const list = cart.map((index, item) => <div key={index}>{item}</div>
-            // );
-        },
-        width: 150
-    },
+    {field: 'shoppingCart', headerName: "Shopping cart", width: 150},
 ];
 
 export function UsersDatatable() {

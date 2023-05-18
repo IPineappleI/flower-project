@@ -7,6 +7,7 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 import CategoryIcon from '@mui/icons-material/Category';
+import SellIcon from '@mui/icons-material/Sell';
 import {Link} from "react-router-dom"
 
 const SideBar = () => {
@@ -55,6 +56,12 @@ const SideBar = () => {
                         <li>
                             <CategoryIcon className="icon"/>
                             <span>Categories</span>
+                        </li>
+                    </Link>
+                    <Link to="/tokens" style={{textDecoration: "none"}}>
+                        <li>
+                            <SellIcon className="icon"/>
+                            <span>Tokens</span>
                         </li>
                     </Link>
                     <p className="title">USEFUL</p>

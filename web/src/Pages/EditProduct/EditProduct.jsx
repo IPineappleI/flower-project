@@ -1,4 +1,4 @@
-import "./EditUser.scss"
+import "./EditProduct.scss"
 import SideBar from "../../Components/SideBar/SideBar";
 import NavBar from "../../Components/NavBar/NavBar";
 import {Link, useParams} from 'react-router-dom';
@@ -7,33 +7,33 @@ import axios from "axios";
 import InfoModal from "../../Components/Modal/InfoModal/InfoModal";
 
 
-const EditUser = () => {
+const EditProduct = () => {
     const params = useParams();
 
     const [infoModal, setInfoModal] = useState(false);
 
-    const [user, setUser] = useState({
+    const [product, setProduct] = useState({
         id: params.userId,
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-        email: "",
-        password: "",
-        role: "",
+        name: "",
+        categoryId: "",
+        price: "",
+        count: "",
+        description: "",
+        image: "",
     });
 
-    const {id, firstName, lastName, phoneNumber, email, password, role} = user;
+    const {id, name, categoryId, price, count, description, image} = product;
 
     const [message, setMessage] = useState('')
 
     const onInputChange = (e) => {
-        setUser({...user, [e.target.name]: e.target.value});
+        setProduct({...product, [e.target.name]: e.target.value});
     }
 
     const onSubmit = async () => {
-        await axios.put(`https://localhost:7153/Users?id=${params.userId}`, user)
+        await axios.put(`https://localhost:7153/Items?id=${params.productId}`, product)
             .then(() => {
-                setMessage("User updated successfully.")
+                setMessage("Product updated successfully.")
                 setInfoModal(true);
             })
             .catch((e) => {
@@ -44,12 +44,12 @@ const EditUser = () => {
     }
 
     useEffect(() => {
-        loadUser();
+        loadProduct();
     }, []);
 
-    const loadUser = async () => {
-        const result = await axios.get(`https://localhost:7153/Users/byId?id=${params.userId}`);
-        setUser(result.data);
+    const loadProduct = async () => {
+        const result = await axios.get(`https://localhost:7153/Items/byId?id=${params.productId}`);
+        setProduct(result.data);
     };
 
     return (
@@ -59,7 +59,7 @@ const EditUser = () => {
                 <div className="newContainer">
                     <NavBar/>
                     <div className="top">
-                        <h1>Edit User</h1>
+                        <h1>Edit Product</h1>
                     </div>
                     <div className="bottom">
                         <div className="left">
@@ -70,43 +70,43 @@ const EditUser = () => {
                                            name="id"/>
                                 </div>
                                 <div className="formInput">
-                                    <label>Email</label>
-                                    <input value={email} onChange={(e) => onInputChange(e)} type="email"
-                                           name="email"/>
+                                    <label>Name</label>
+                                    <input value={name} onChange={(e) => onInputChange(e)} type="email"
+                                           name="name"/>
                                 </div>
                                 <div className="formInput">
-                                    <label>First name</label>
-                                    <input value={firstName} onChange={(e) => onInputChange(e)} type="text"
-                                           name="firstName"/>
+                                    <label>Category Id</label>
+                                    <input value={categoryId} onChange={(e) => onInputChange(e)} type="text"
+                                           name="categoryId"/>
                                 </div>
                                 <div className="formInput">
-                                    <label>Last name</label>
-                                    <input value={lastName} onChange={(e) => onInputChange(e)} type="text"
-                                           name="lastName"/>
+                                    <label>Price</label>
+                                    <input value={price} onChange={(e) => onInputChange(e)} type="text"
+                                           name="price"/>
                                 </div>
                             </form>
                         </div>
                         <div className="right">
                             <form>
                                 <div className="formInput">
-                                    <label>Phone number</label>
-                                    <input value={phoneNumber} onChange={(e) => onInputChange(e)} type="text"
-                                           name="phoneNumber"/>
+                                    <label>Count</label>
+                                    <input value={count} onChange={(e) => onInputChange(e)} type="text"
+                                           name="count"/>
                                 </div>
                                 <div className="formInput">
-                                    <label>Password</label>
-                                    <input value={password} onChange={(e) => onInputChange(e)} type="text"
-                                           name="password"/>
+                                    <label>Description</label>
+                                    <input value={description} onChange={(e) => onInputChange(e)} type="text"
+                                           name="description"/>
                                 </div>
                                 <div className="formInput">
-                                    <label>Role</label>
-                                    <input value={role} onChange={(e) => onInputChange(e)} type="text"
-                                           name="role"/>
+                                    <label>Image</label>
+                                    <input value={image} onChange={(e) => onInputChange(e)} type="text"
+                                           name="image"/>
                                 </div>
                             </form>
                         </div>
                     </div>
-                    <Link to="/users">
+                    <Link to="/products">
                         <button>Cancel</button>
                     </Link>
                     <button onClick={onSubmit}>Save changes</button>
@@ -121,4 +121,4 @@ const EditUser = () => {
     )
 }
 
-export default EditUser
+export default EditProduct

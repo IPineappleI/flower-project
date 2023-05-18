@@ -1,4 +1,4 @@
-import "./EditUser.scss"
+import "./EditOrder.scss"
 import SideBar from "../../Components/SideBar/SideBar";
 import NavBar from "../../Components/NavBar/NavBar";
 import {Link, useParams} from 'react-router-dom';
@@ -7,33 +7,31 @@ import axios from "axios";
 import InfoModal from "../../Components/Modal/InfoModal/InfoModal";
 
 
-const EditUser = () => {
+const EditOrder = () => {
     const params = useParams();
 
     const [infoModal, setInfoModal] = useState(false);
 
-    const [user, setUser] = useState({
-        id: params.userId,
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-        email: "",
-        password: "",
-        role: "",
+    const [order, setOrder] = useState({
+        id: params.orderId,
+        dateAndTime: "",
+        clientId: -1,
+        price: 0,
+        status: "",
     });
 
-    const {id, firstName, lastName, phoneNumber, email, password, role} = user;
+    const {id, dateAndTime, clientId, price, status} = order;
 
     const [message, setMessage] = useState('')
 
     const onInputChange = (e) => {
-        setUser({...user, [e.target.name]: e.target.value});
+        setOrder({...order, [e.target.name]: e.target.value});
     }
 
     const onSubmit = async () => {
-        await axios.put(`https://localhost:7153/Users?id=${params.userId}`, user)
+        await axios.put(`https://localhost:7153/Orders?id=${params.orderId}`, order)
             .then(() => {
-                setMessage("User updated successfully.")
+                setMessage("Order updated successfully.")
                 setInfoModal(true);
             })
             .catch((e) => {
@@ -44,12 +42,12 @@ const EditUser = () => {
     }
 
     useEffect(() => {
-        loadUser();
+        loadOrder();
     }, []);
 
-    const loadUser = async () => {
-        const result = await axios.get(`https://localhost:7153/Users/byId?id=${params.userId}`);
-        setUser(result.data);
+    const loadOrder = async () => {
+        const result = await axios.get(`https://localhost:7153/Orders/byId?id=${params.orderId}`);
+        setOrder(result.data);
     };
 
     return (
@@ -59,7 +57,7 @@ const EditUser = () => {
                 <div className="newContainer">
                     <NavBar/>
                     <div className="top">
-                        <h1>Edit User</h1>
+                        <h1>Edit Order</h1>
                     </div>
                     <div className="bottom">
                         <div className="left">
@@ -70,43 +68,33 @@ const EditUser = () => {
                                            name="id"/>
                                 </div>
                                 <div className="formInput">
-                                    <label>Email</label>
-                                    <input value={email} onChange={(e) => onInputChange(e)} type="email"
-                                           name="email"/>
+                                    <label>Price</label>
+                                    <input value={price} onChange={(e) => onInputChange(e)} type="email"
+                                           name="price"/>
                                 </div>
                                 <div className="formInput">
-                                    <label>First name</label>
-                                    <input value={firstName} onChange={(e) => onInputChange(e)} type="text"
-                                           name="firstName"/>
-                                </div>
-                                <div className="formInput">
-                                    <label>Last name</label>
-                                    <input value={lastName} onChange={(e) => onInputChange(e)} type="text"
-                                           name="lastName"/>
+                                    <label>Client ID</label>
+                                    <input value={clientId} onChange={(e) => onInputChange(e)} type="text"
+                                           name="clientId"/>
                                 </div>
                             </form>
                         </div>
                         <div className="right">
                             <form>
                                 <div className="formInput">
-                                    <label>Phone number</label>
-                                    <input value={phoneNumber} onChange={(e) => onInputChange(e)} type="text"
-                                           name="phoneNumber"/>
+                                    <label>Status</label>
+                                    <input value={status} onChange={(e) => onInputChange(e)} type="text"
+                                           name="status"/>
                                 </div>
                                 <div className="formInput">
-                                    <label>Password</label>
-                                    <input value={password} onChange={(e) => onInputChange(e)} type="text"
-                                           name="password"/>
-                                </div>
-                                <div className="formInput">
-                                    <label>Role</label>
-                                    <input value={role} onChange={(e) => onInputChange(e)} type="text"
-                                           name="role"/>
+                                    <label>Date and Time</label>
+                                    <input value={dateAndTime} onChange={(e) => onInputChange(e)} type="text"
+                                           name="dateAndTime"/>
                                 </div>
                             </form>
                         </div>
                     </div>
-                    <Link to="/users">
+                    <Link to="/orders">
                         <button>Cancel</button>
                     </Link>
                     <button onClick={onSubmit}>Save changes</button>
@@ -121,4 +109,4 @@ const EditUser = () => {
     )
 }
 
-export default EditUser
+export default EditOrder

@@ -5,6 +5,7 @@ import {Link} from 'react-router-dom';
 import {useState} from "react";
 import axios from "axios";
 import ConfirmModal from "../../Components/Modal/ConfirmModal/ConfirmModal"
+import InfoModal from "../../Components/Modal/InfoModal/InfoModal";
 
 const NewUser = () => {
     const [role, setRole] = useState('');
@@ -14,14 +15,10 @@ const NewUser = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const [showSuccessModal, setSuccessModal] = useState(false);
     const [showFailModal, setFailModal] = useState(false);
+    const [message, setMessage] = useState('');
 
     const create = () => {
-
-        if(window.confirm("Are you sure to delete user?")) {
-            console.log("OK");
-        }
 
         let data = {
             "firstName": firstName,
@@ -37,8 +34,10 @@ const NewUser = () => {
             headers: {},
             data: data
         }).then(() => {
-            setSuccessModal(true);
+            setMessage("User created successfully.")
+            setFailModal(true);
         }).catch((error) => {
+            setMessage("Can't create user, please, check if data is correct.");
             console.log(error);
             setFailModal(true);
         });
@@ -95,9 +94,13 @@ const NewUser = () => {
                 <Link to="/users">
                     <button>Cancel</button>
                 </Link>
-                <button onClick={() => setSuccessModal(true)}>Create a new user</button>
+                <button onClick={create}>Create a new user</button>
+                <InfoModal
+                    open={showFailModal}
+                    onClose={() => setFailModal(false)}
+                    text={message}
+                />
             </div>
-            <ConfirmModal open={showSuccessModal} onClose={() => setSuccessModal(false)} text="Are you sure"/>
         </div>
     )
 }

@@ -16,8 +16,8 @@ public class UsersController : ControllerBase
     private static async Task Create(User user)
     {
         const string commandText =
-            "INSERT INTO users (first_name, last_name, email, phone_number, password, role, shopping_cart) " +
-            "VALUES (@firstName, @lastName, @email, @phoneNumber, @password, @role, @shoppingCart)";
+            "INSERT INTO users (first_name, last_name, email, phone_number, password, role) " +
+            "VALUES (@firstName, @lastName, @email, @phoneNumber, @password, @role)";
 
         await using var cmd = new NpgsqlCommand(commandText, DataBase.Connection);
 
@@ -27,8 +27,6 @@ public class UsersController : ControllerBase
         cmd.Parameters.AddWithValue("phoneNumber", user.PhoneNumber);
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
-        cmd.Parameters.AddWithValue("shoppingCart", 
-            user.ShoppingCart == null ? null : JsonConvert.SerializeObject(user.ShoppingCart));
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -211,8 +209,7 @@ public class UsersController : ControllerBase
         cmd.Parameters.AddWithValue("password", user.Password);
         cmd.Parameters.AddWithValue("role", user.Role);
         cmd.Parameters.AddWithValue("emailConfirmed", user.EmailConfirmed);
-        cmd.Parameters.AddWithValue("shoppingCart", 
-            user.ShoppingCart == null ? null : JsonConvert.SerializeObject(user.ShoppingCart));
+        cmd.Parameters.AddWithValue("shoppingCart", JsonConvert.SerializeObject(user.ShoppingCart));
 
         await cmd.ExecuteNonQueryAsync();
     }

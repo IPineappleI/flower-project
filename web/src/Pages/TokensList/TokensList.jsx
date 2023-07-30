@@ -1,11 +1,10 @@
-import "./CategoriesList.scss"
+import "./TokensList.scss"
 import SideBar from "../../Components/SideBar/SideBar";
-import "../../Components/SideBar/SideBar.scss"
-import {CategoriesDatatable} from "../../Components/CategoriesDatatable/CategoriesDatatable";
 import NavBar from "../../Components/NavBar/NavBar";
+import {TokensDatatable} from "../../Components/TokensDatatable/TokensDatatable";
 import {Link} from "react-router-dom";
 
-export const CategoriesList = () => {
+export const TokensList = () => {
     return (
         <div className="list">
             <SideBar/>
@@ -13,11 +12,11 @@ export const CategoriesList = () => {
                 <NavBar/>
                 <div className="datatable">
                     <div className="listTitle">
-                        <h1>Categories</h1>
+                        <h1>Tokens</h1>
                     </div>
-                    <CategoriesDatatable/>
-                    <Link to="/categories/new">
-                        <button className="mainButton">Add new category</button>
+                    <TokensDatatable/>
+                    <Link to="/tokens/new">
+                        <button className="mainButton">Add new token</button>
                     </Link>
                 </div>
             </div>

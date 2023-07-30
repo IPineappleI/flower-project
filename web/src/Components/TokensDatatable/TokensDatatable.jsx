@@ -1,21 +1,18 @@
-import "./CategoriesDatatable.scss"
+import "./TokensDatatable.scss"
 import {DataGrid} from '@mui/x-data-grid';
-import React, {useState, useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import Axios from "axios";
 import ConfirmModal from "../Modal/ConfirmModal/ConfirmModal";
-import {Link} from "react-router-dom";
 
 const columns = [
-    {field: 'id', headerName: 'Id', width: 100},
-    {field: 'name', headerName: 'Name', width: 200},
-    {field: 'image', headerName: 'Image', width: 250},
+    {field: 'email', headerName: 'User email', width: 200},
+    {field: 'token', headerName: 'Token', width: 300},
 ];
 
-export function CategoriesDatatable() {
-
+export function TokensDatatable() {
     const [url, setUrl] = useState("");
 
-    const [categories, setCategories] = useState([]);
+    const [tokens, setTokens] = useState([]);
 
     const [loaded, setLoaded] = useState(false);
 
@@ -24,10 +21,10 @@ export function CategoriesDatatable() {
     useEffect(() => {
         if (loaded)
             return;
-        Axios.get("https://localhost:7153/Categories")
+        Axios.get("https://localhost:7153/Tokens")
             .then(
                 (res) => {
-                    setCategories(res?.data);
+                    setTokens(res?.data);
                 });
         setLoaded(true);
     })
@@ -40,12 +37,10 @@ export function CategoriesDatatable() {
             renderCell: (params) => {
                 return (
                     <div className="cellAction">
-                        <Link to={"/categories/edit/" + params.row.id} style={{textDecoration: "none"}}>
-                            <div className="editButton">Edit</div>
-                        </Link>
+                        <div className="editButton">Edit</div>
                         <div className="deleteButton" onClick={() => {
                             setShowModal(true);
-                            setUrl("https://localhost:7153/Categories?id=" + params.row.id)
+                            setUrl("https://localhost:7153/Tokens?email=" + params.row.email.toString().replace('@', '%40'))
                         }}>Delete
                         </div>
                     </div>
@@ -57,21 +52,20 @@ export function CategoriesDatatable() {
         <div className="data">
             <div className="datatable">
                 <DataGrid
-                    rows={categories}
+                    getRowId={(row) => row.email}
+                    rows={tokens}
                     columns={columns.concat(actionColumn)}
                     pageSize={10}
                     rowsPerPageOptions={[10]}
                 />
             </div>
-            <div className="window">
-                <ConfirmModal
-                    open={showModal}
-                    onClose={() => setShowModal(false)}
-                    text="Are you sure to delete category?"
-                    url={url}
-                    loaded={() => setLoaded(false)}
-                />
-            </div>
+            <ConfirmModal
+                open={showModal}
+                onClose={() => setShowModal(false)}
+                text="Are you sure to delete token?"
+                url={url}
+                loaded={() => setLoaded(false)}
+            />
         </div>
     )
 }

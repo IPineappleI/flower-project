@@ -4,8 +4,8 @@ import NavBar from "../../Components/NavBar/NavBar";
 import {Link} from 'react-router-dom';
 import {useState} from "react";
 import axios from "axios";
-import Modal from 'react-modal';
-
+import ConfirmModal from "../../Components/Modal/ConfirmModal/ConfirmModal"
+import InfoModal from "../../Components/Modal/InfoModal/InfoModal";
 
 const NewUser = () => {
     const [role, setRole] = useState('');
@@ -15,8 +15,8 @@ const NewUser = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const [showSuccessModal, setSuccessModal] = useState(false);
     const [showFailModal, setFailModal] = useState(false);
+    const [message, setMessage] = useState('');
 
     const create = () => {
 
@@ -28,15 +28,16 @@ const NewUser = () => {
             "password": password,
             "role": role,
         };
-        const response = axios({
+        axios({
             method: 'post',
             url: "https://localhost:7153/Users",
             headers: {},
             data: data
         }).then(() => {
-            console.log(response);
-            setSuccessModal(true);
+            setMessage("User created successfully.")
+            setFailModal(true);
         }).catch((error) => {
+            setMessage("Can't create user, please, check if data is correct.");
             console.log(error);
             setFailModal(true);
         });
@@ -94,22 +95,11 @@ const NewUser = () => {
                     <button>Cancel</button>
                 </Link>
                 <button onClick={create}>Create a new user</button>
-                <Modal ariaHideApp={false} isOpen={showSuccessModal} onRequestClose={() => setSuccessModal(false)}
-                       portalClassName="modal">
-                    <div className="modal-content">
-                        User created successfully
-                        <button onClick={() => setSuccessModal(false)}> OK </button>
-                    </div>
-                </Modal>
-                <Modal ariaHideApp={false} isOpen={showFailModal} onRequestClose={() => setFailModal(false)}
-                       portalClassName="modal">
-                    <div className="modal-content">
-                        Can't create user, please check if info is correct.
-                        <button onClick={() => setFailModal(false)}>
-                            Close
-                        </button>
-                    </div>
-                </Modal>
+                <InfoModal
+                    open={showFailModal}
+                    onClose={() => setFailModal(false)}
+                    text={message}
+                />
             </div>
         </div>
     )

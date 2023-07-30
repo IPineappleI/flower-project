@@ -1,13 +1,11 @@
-import "./SingleUser.scss"
+import "./SingleOrder.scss"
 import SideBar from "../../Components/SideBar/SideBar";
 import NavBar from "../../Components/NavBar/NavBar";
-import {OrdersDatatable} from "../../Components/OrdersDatatable/OrdersDatatable";
 import {useParams} from "react-router-dom";
 import {useState, useEffect} from "react";
 import Axios from "axios";
-import Chart from "../../Components/chart/Chart";
 
-function SingleUser() {
+function SingleOrder() {
 
     const params = useParams();
 
@@ -18,7 +16,7 @@ function SingleUser() {
         if (loaded) {
             return;
         }
-        let url = "https://localhost:7153/Users/byId?id=" + params.userId;
+        let url = "https://localhost:7153/Orders/byId?id=" + params.orderId;
 
         Axios.get(url)
             .then(
@@ -41,37 +39,26 @@ function SingleUser() {
                             <span className="itemValue">{data.id}</span>
                         </div>
                         <div className="detailItem">
-                            <span className="itemKey">First name:</span>
-                            <span className="itemValue">{data.firstName}</span>
+                            <span className="itemKey">Date and time:</span>
+                            <span className="itemValue">{data.dateAndTime}</span>
                         </div>
                         <div className="detailItem">
-                            <span className="itemKey">Last name:</span>
-                            <span className="itemValue">{data.lastName}</span>
+                            <span className="itemKey">Client id:</span>
+                            <span className="itemValue">{data.clientId}</span>
                         </div>
                         <div className="detailItem">
-                            <span className="itemKey">Email:</span>
-                            <span className="itemValue">{data.email}</span>
+                            <span className="itemKey">Order price:</span>
+                            <span className="itemValue">{data.price}</span>
                         </div>
                         <div className="detailItem">
-                            <span className="itemKey">Phone number:</span>
-                            <span className="itemValue">{data.phoneNumber}</span>
-                        </div>
-                        <div className="detailItem">
-                            <span className="itemKey">Role:</span>
-                            <span className="itemValue">{data.role}</span>
+                            <span className="itemKey">Status:</span>
+                            <span className="itemValue">{data.status}</span>
                         </div>
                     </div>
-                    <div className="right">
-                        <Chart aspect={3/1} title="User Spending (Last 6 Months)"/>
-                    </div>
-                </div>
-                <div className="bottom">
-                    <h1 className="title">Last orders</h1>
-                    <OrdersDatatable/>
                 </div>
             </div>
         </div>
     )
 }
 
-export default SingleUser
+export default SingleOrder

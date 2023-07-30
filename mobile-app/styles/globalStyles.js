@@ -7,7 +7,7 @@ const CONTENT_BACKGROUND = "#f9f9f9";
 export const globalStyles = StyleSheet.create({
     mainSafeArea: {
         backgroundColor: HEADER_BACKGROUND,
-        flex: 1
+        flex: 1,
     },
     topSafeArea: {
         backgroundColor: HEADER_BACKGROUND,
@@ -19,12 +19,12 @@ export const globalStyles = StyleSheet.create({
             Platform.OS === "ios" ? CONTENT_BACKGROUND : HEADER_BACKGROUND,
     },
     header: {
-        height: 60,
         backgroundColor: HEADER_BACKGROUND,
     },
     headerText: {
         color: "#fff",
-        fontSize: 18
+        fontSize: 18,
+        fontFamily: "os-bold"
     },
     backTitleText: {
         color: "#30135b",
@@ -40,6 +40,7 @@ export const globalStyles = StyleSheet.create({
     label: {
         color: "#7d7e79",
         fontSize: 16,
+        fontFamily: "os-light",
         lineHeight: 30
     },
     input: {
@@ -62,7 +63,7 @@ export const globalStyles = StyleSheet.create({
         padding: 15,
         borderRadius: 15,
     },
-    signUpButton: {
+    submitButton: {
         marginTop: 20,
         backgroundColor: HEADER_BACKGROUND,
         padding: 15,

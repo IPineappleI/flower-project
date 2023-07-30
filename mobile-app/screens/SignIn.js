@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Text, SafeAreaView, View, TouchableOpacity, Alert} from 'react-native';
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -9,32 +9,26 @@ import {Formik} from "formik";
 import axios from "axios";
 
 export default function SignIn({navigation}) {
+    const [isUserSignedIn, setUserSignedIn] = useState(false);
+
     function onSignInHandler(values) {
         let user = {
-                "email": values.email,
-                "password": values.password
-            }
+            "email": values.email,
+            "password": values.password
+        }
 
         let query = Object.keys(user)
             .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(user[k]))
             .join('&');
 
-        if (query === null) {
-            console.log("Null query");
-        } else {
-            console.log("SignIn query = " + query);
-        }
-
-        let url = ("http://localhost:7153/Users/authorizeByEmail?" + query);
-
-        console.log(url);
-
         try {
-            const response = axios.get(url);
-
-            response.then((res) => {
-                AsyncStorage.setItem("user", res.data)
-                    .then(navigation.navigate('Home', {screen: 'Catalog'}));
+            axios.get(`http://localhost:7153/Users/authorizeByEmail?${query}`)
+                .then((res) => {
+                AsyncStorage.setItem("user", JSON.stringify(res.data))
+                    .then(() => {
+                    setUserSignedIn(true);
+                    navigation.navigate("UserPage", {isUserInfoChanged: isUserSignedIn});
+                });
             }).catch((error) => {
                     let res = error.response;
                     if (res.data === "user not found") {
@@ -57,7 +51,7 @@ export default function SignIn({navigation}) {
     }
 
     function onSignUpHandler() {
-        navigation.navigate("SignUp");
+        navigation.navigate('SignUp');
     }
 
     function isFormValid(isValid, touched) {
@@ -130,7 +124,7 @@ export default function SignIn({navigation}) {
                                 </Text>
 
                                 <TouchableOpacity onPress={onSignUpHandler} style={{marginTop: -15}}>
-                                    <View style={globalStyles.signUpButton}>
+                                    <View style={globalStyles.submitButton}>
                                         <Text style={globalStyles.buttonText}>SIGN UP</Text>
                                     </View>
                                 </TouchableOpacity>
